@@ -1,0 +1,30 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_size = 4
+indent_style = tab
+insert_final_newline = false
+max_line_length = 160
+tab_width = 4
+ij_continuation_indent_size = 8
+ij_formatter_off_tag = @formatter:off
+ij_formatter_on_tag = @formatter:on
+ij_formatter_tags_enabled = false
+ij_smart_tabs = false
+ij_visual_guides = none
+ij_wrap_on_typing = false
+
+[{*.lua,*.lua.txt}]
+ij_continuation_indent_size = 4
+ij_lua_align_consecutive_variable_declarations = false
+ij_lua_align_multiline_parameters = true
+ij_lua_align_multiline_parameters_in_calls = false
+ij_lua_call_parameters_wrap = off
+ij_lua_keep_indents_on_empty_lines = false
+ij_lua_keep_simple_blocks_in_one_line = false
+ij_lua_method_parameters_wrap = off
+ij_lua_space_after_comma = true
+ij_lua_space_before_comma = false
+ij_lua_spaces_around_assignment_operators = true
