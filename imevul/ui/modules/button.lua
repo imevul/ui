@@ -3,14 +3,7 @@ local ui = args[1]
 
 local Button = ui.lib.class(ui.modules.Text,function(this, data)
 	data = data or {}
-	this.text = data.text or ''
-
-	this.width = string.len(this.text)
-	if data.width ~= nil then
-		this.width = data.width
-	end
-
-	this.height = 1
+	ui.modules.Text.init(this, data)
 end)
 
 function Button:_draw()

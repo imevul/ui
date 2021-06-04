@@ -3,8 +3,11 @@ local ui = args[1]
 
 local App = ui.lib.class(ui.modules.Container, function(this, data)
 	data = data or {}
+	ui.modules.Container.init(this, data)
+
 	this.width = data.width or 51
 	this.height = data.height or 19
+
 	this.theme = data.theme or {
 		primary = colors.cyan,
 		secondary = colors.orange,
@@ -16,7 +19,7 @@ function App:_draw()
 	ui.lib.cobalt.graphics.clear()
 end
 
-function App:init()
+function App:initialize()
 	-- Cobalt hooks
 	function ui.lib.cobalt.draw()
 		this:_draw()

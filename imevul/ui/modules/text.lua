@@ -2,6 +2,7 @@ local args = { ... }
 local ui = args[1]
 
 local Text = ui.lib.class(ui.modules.Object,function(this, data)
+	ui.modules.Object.init(this, data)
 	data = data or {}
 	this.text = data.text or ''
 

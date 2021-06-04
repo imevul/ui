@@ -29,4 +29,4 @@ win:add(UI_Button({
 	}
 }))
 
-app:init()
+app:initialize()

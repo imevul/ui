@@ -1,7 +1,8 @@
 local args = { ... }
 local ui = args[1]
 
-local Container = ui.lib.class(ui.modules.Object, function(this)
+local Container = ui.lib.class(ui.modules.Object, function(this, data)
+	ui.modules.Object.init(this, data)
 	this.objects = {}
 end)
 
