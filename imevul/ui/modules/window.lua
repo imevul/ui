@@ -2,12 +2,6 @@ local args = { ... }
 local ui = args[1]
 
 local Window = ui.lib.class(ui.modules.Container, function(this)
-	this.colors = {
-		primary = colors.cyan,
-		secondary = colors.orange,
-		background = colors.gray
-	}
-
 	local topParent = this:_getTopParent()
 	if topParent ~= nil then
 		this.theme = topParent.theme

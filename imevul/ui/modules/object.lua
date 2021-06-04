@@ -2,10 +2,11 @@ local args = { ... }
 local ui = args[1]
 
 local Object = ui.lib.class(function(this, data)
+	data = data or {}
 	this.width = data.width
 	this.height = data.height
 	this.callbacks = data.callbacks or {}
-	this.canvas = cobalt.graphics.newCanvas(width, height)
+	this.canvas = ui.lib.cobalt.graphics.newCanvas(width, height)
 	this.parent = nil
 end)
 

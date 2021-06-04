@@ -2,6 +2,7 @@ local args = { ... }
 local ui = args[1]
 
 local App = ui.lib.class(ui.modules.Container, function(this, data)
+	data = data or {}
 	this.width = data.width or 51
 	this.height = data.height or 19
 	this.theme = data.theme or {
