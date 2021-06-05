@@ -43,13 +43,12 @@ function Text:setText(newText)
 	self.text = newText
 	if not self.fixedWidth then
 		self.width = string.len(newText) + math.ceil(self.padding * 2)
+		self.canvas = gfx.newCanvas(self.width, self.height)
 	end
 
 	if self.callbacks.onChange then
 		self.callbacks.onChange(self)
 	end
-
-	self.canvas = gfx.newCanvas(self.width, self.height)
 end
 
 function Text:_draw()

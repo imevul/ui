@@ -83,6 +83,10 @@ function App:initialize()
 		self:_textInput(char)
 	end
 
+	cobalt.eventhandler = function (event, a, b, c, d, e)
+		self:_eventHandler(event, a, b, c, d, e)
+	end
+
 	ui.lib.cobalt.init()
 end
 
@@ -99,6 +103,12 @@ end
 function App:_load()
 	if self.callbacks.load then
 		self.callbacks.load(self)
+	end
+end
+
+function App:_eventHandler(event, a, b, c, d, e)
+	if self.callbacks[event] then
+		self.callbacks[event](self, a, b, c, d, e)
 	end
 end
 

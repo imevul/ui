@@ -10,7 +10,9 @@ local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	ui.modules.Container.init(this, data)
 
 	data = data or {}
+	data.color = data.color or nil
 	this.title = data.title or ''
+	this.color = data.color
 	this.type = 'Window'
 end)
 
@@ -18,7 +20,7 @@ function Window:_draw()
 	gfx.setBackgroundColor(self.config.theme.background)
 	gfx.clear()
 
-	gfx.setColor(self.config.theme.primary)
+	gfx.setColor(self.color or self.config.theme.primary)
 	gfx.rect('line', 0, 0, self.width, self.height)
 	gfx.setColor(colors.white)
 	gfx.setBackgroundColor(self.config.theme.primary)
