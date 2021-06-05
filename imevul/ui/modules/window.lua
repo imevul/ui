@@ -23,7 +23,7 @@ function Window:_draw()
 	gfx.setColor(self.color or self.config.theme.primary)
 	gfx.rect('line', 0, 0, self.width, self.height)
 	gfx.setColor(colors.white)
-	gfx.setBackgroundColor(self.config.theme.primary)
+	gfx.setBackgroundColor(self.color or self.config.theme.primary)
 	gfx.print(self.title, math.floor((self.width - string.len(self.title)) / 2), 0)
 	gfx.setBackgroundColor(self.config.theme.background)
 
