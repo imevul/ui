@@ -15,8 +15,10 @@ end
 
 function Container:_drawObjects()
 	-- Do draw their children though!
+	self.objects = self.objects or {}
+
 	for _, obj in pairs(self.objects) do
-		obj.ref.draw()
+		obj.ref:_draw()
 	end
 
 	self.canvas.renderTo(function()
@@ -27,6 +29,8 @@ function Container:_drawObjects()
 end
 
 function Container:_mouseReleased(x, y, button)
+	self.objects = self.objects or {}
+
 	for _, obj in pairs(self.objects) do
 		local rx = x - obj.x
 		local ry = y - obj.y
@@ -38,6 +42,8 @@ function Container:_mouseReleased(x, y, button)
 end
 
 function Container:add(object, x, y)
+	self.objects = self.objects or {}
+
 	local obj = {
 		ref = object,
 		x = x,
@@ -51,7 +57,7 @@ function Container:add(object, x, y)
 	end
 
 	table.insert(self.objects, obj)
-	object:_setParent(self)
+	object:_inheritConfig(self.config)
 end
 
 return Container

@@ -8,16 +8,20 @@ local App = ui.lib.class(ui.modules.Container, function(this, data)
 	this.width = data.width or 51
 	this.height = data.height or 19
 
-	this.theme = data.theme or {
-		text = colors.black,
-		primary = colors.cyan,
-		secondary = colors.orange,
-		background = colors.gray
+	this.config = data.config or {
+		theme = {
+			text = colors.black,
+			primary = colors.cyan,
+			secondary = colors.orange,
+			background = colors.gray
+		}
 	}
 end)
 
 function App:_draw()
 	ui.lib.cobalt.graphics.clear()
+
+	ui.modules.Container:_draw()
 end
 
 function App:initialize()

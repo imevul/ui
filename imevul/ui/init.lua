@@ -1,7 +1,8 @@
 local ui = {
 	config = {
 		path = '/imevul/ui',
-		cobaltPath = '/cobalt'
+		cobaltPath = '/cobalt',
+		debug = true
 	},
 	lib = {},
 	modules = {}
@@ -11,7 +12,14 @@ local ui = {
 ui.lib.class = dofile(ui.config.path .. '/lib/class.lua')
 ui.lib.cobalt = dofile(ui.config.cobaltPath .. '/init.lua')
 
+local printDebug = function(text)
+	if ui.config.debug then
+		print(text)
+	end
+end
+
 local loadModule = function(module)
+	printDebug('Loading module ' .. module)
 	ui.modules[module] = loadfile(ui.config.path .. '/modules/' .. string.lower(module) .. '.lua')(ui)
 	return ui.modules[module]
 end
@@ -22,5 +30,8 @@ UI_Window = loadModule('Window')
 UI_Text = loadModule('Text')
 UI_Button = loadModule('Button')
 UI_App = loadModule('App')
+
+-- Wait for everything to finish loading
+sleep(0.5)
 
 return ui

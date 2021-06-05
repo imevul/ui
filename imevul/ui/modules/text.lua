@@ -16,7 +16,7 @@ end)
 
 function Text:_draw()
 	self.canvas:renderTo(function()
-		ui.lib.cobalt.graphics.setColor(self.topParent.theme.text)
+		ui.lib.cobalt.graphics.setColor(self.config.theme.text)
 		ui.lib.cobalt.graphics.print(self.text, 0, 0)
 	end)
 

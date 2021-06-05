@@ -7,29 +7,11 @@ local Object = ui.lib.class(function(this, data)
 	this.height = data.height or 1
 	this.callbacks = data.callbacks or {}
 	this.canvas = ui.lib.cobalt.graphics.newCanvas(this.width, this.height)
-	this.parent = nil
-	this.topParent = nil
+	this.config = data.config or {}
 end)
 
-function Object:_getTopParent()
-	if self.topParent == nil then
-		local p = self.parent
-		local t
-
-		while p ~= nil do
-			t = p
-			p = p.parent
-		end
-
-		self.topParent = t
-	end
-
-	return self.topParent
-end
-
-function Object:_setParent(parent)
-	self.parent = parent
-	self:_getTopParent()
+function Object:_inheritConfig(config)
+	this.config = config or {}
 end
 
 function Object:_draw()
