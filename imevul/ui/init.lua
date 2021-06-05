@@ -24,14 +24,14 @@ local loadModule = function(module)
 	return ui.modules[module]
 end
 
+-- Make modules easily available
 UI_Object = loadModule('Object')
 UI_Container = loadModule('Container')
 UI_Window = loadModule('Window')
 UI_Text = loadModule('Text')
+UI_Input = loadModule('Input')
 UI_Button = loadModule('Button')
+UI_Bar = loadModule('Bar')
 UI_App = loadModule('App')
-
--- Wait for everything to finish loading
-sleep(0.5)
 
 return ui

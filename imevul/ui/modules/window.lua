@@ -1,19 +1,31 @@
 local args = { ... }
 local ui = args[1]
+local gfx = ui.lib.cobalt.graphics
 
+--[[
+Class Window
+Container with a border and a title
+]]--
 local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	ui.modules.Container.init(this, data)
+
+	data = data or {}
+	this.title = data.title or ''
+	this.type = 'Window'
 end)
 
 function Window:_draw()
-	self.canvas:renderTo(function()
-		ui.lib.cobalt.graphics.setColor(self.config.theme.background)
-		ui.lib.cobalt.graphics.rect('fill', self.x, self.y, self.width, self.height)
-		ui.lib.cobalt.graphics.setColor(self.config.theme.primary)
-		ui.lib.cobalt.graphics.rect('line', self.x, self.y, self.width, self.height)
-	end)
+	gfx.setBackgroundColor(self.config.theme.background)
+	gfx.clear()
 
-	ui.modules.Container:_draw()
+	gfx.setColor(self.config.theme.primary)
+	gfx.rect('line', 0, 0, self.width, self.height)
+	gfx.setColor(colors.white)
+	gfx.setBackgroundColor(self.config.theme.primary)
+	gfx.print(self.title, math.floor((self.width - string.len(self.title)) / 2), 0)
+	gfx.setBackgroundColor(self.config.theme.background)
+
+	ui.modules.Container._draw(self)
 end
 
 return Window
