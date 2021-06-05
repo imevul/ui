@@ -3,35 +3,41 @@ local ui = args[1]
 
 local Object = ui.lib.class(function(this, data)
 	data = data or {}
-	this.width = data.width
-	this.height = data.height
+	this.width = data.width or 1
+	this.height = data.height or 1
 	this.callbacks = data.callbacks or {}
-	this.canvas = ui.lib.cobalt.graphics.newCanvas(width, height)
+	this.canvas = ui.lib.cobalt.graphics.newCanvas(this.width, this.height)
 	this.parent = nil
+	this.topParent = nil
 end)
 
 function Object:_getTopParent()
-	local p = this.parent
-	local t
+	if self.topParent == nil then
+		local p = self.parent
+		local t
 
-	while p ~= nil do
-		t = p
-		p = p.parent
+		while p ~= nil do
+			t = p
+			p = p.parent
+		end
+
+		self.topParent = t
 	end
 
-	return t
+	return self.topParent
 end
 
 function Object:_setParent(parent)
-	this.parent = parent
+	self.parent = parent
+	self:_getTopParent()
 end
 
 function Object:_draw()
 end
 
 function Object:_mouseReleased(x, y, button)
-	if this.callbacks.mouseReleased ~= nil then
-		this.callbacks.mouseReleased(this)
+	if self.callbacks.mouseReleased then
+		self.callbacks.mouseReleased(self)
 	end
 end
 

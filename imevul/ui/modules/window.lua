@@ -10,14 +10,14 @@ local Window = ui.lib.class(ui.modules.Container, function(this, data)
 end)
 
 function Window:_draw()
-	this.canvas:renderTo(function()
-		ui.lib.cobalt.graphics.setColor(this.theme.background)
-		ui.lib.cobalt.graphics.rect('fill', this.x, this.y, this.width, this.height)
+	self.canvas:renderTo(function()
+		ui.lib.cobalt.graphics.setColor(self.theme.background)
+		ui.lib.cobalt.graphics.rect('fill', self.x, self.y, self.width, self.height)
 		ui.lib.cobalt.graphics.setColor(this.theme.primary)
-		ui.lib.cobalt.graphics.rect('line', this.x, this.y, this.width, this.height)
+		ui.lib.cobalt.graphics.rect('line', self.x, self.y, self.width, self.height)
 	end)
 
-	this:_drawObjects()
+	ui.modules.Container:_draw()
 end
 
 return Window

@@ -9,6 +9,7 @@ local App = ui.lib.class(ui.modules.Container, function(this, data)
 	this.height = data.height or 19
 
 	this.theme = data.theme or {
+		text = colors.black,
 		primary = colors.cyan,
 		secondary = colors.orange,
 		background = colors.gray
@@ -22,23 +23,23 @@ end
 function App:initialize()
 	-- Cobalt hooks
 	function ui.lib.cobalt.draw()
-		this:_draw()
+		self:_draw()
 	end
 
 	function ui.lib.cobalt.update(dt)
-		this:_update(dt)
+		self:_update(dt)
 	end
 
 	function ui.lib.cobalt.mousereleased(x, y, button)
-		this:_mouseReleased(x, y, button)
+		self:_mouseReleased(x, y, button)
 	end
 
 	ui.lib.cobalt.init()
 end
 
 function App:_update(dt)
-	if this.callbacks.update ~= nil then
-		this.callbacks.update(dt)
+	if self.callbacks.update ~= nil then
+		self.callbacks.update(dt)
 	end
 end
 

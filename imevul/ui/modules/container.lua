@@ -7,25 +7,27 @@ local Container = ui.lib.class(ui.modules.Object, function(this, data)
 end)
 
 function Container:_draw()
+	ui.modules.Object:_draw()
+
 	-- Empty, since containers are just a data structure with no visual representation
-	this:_drawObjects()
+	self:_drawObjects()
 end
 
 function Container:_drawObjects()
 	-- Do draw their children though!
-	for _, obj in pairs(this.objects) do
+	for _, obj in pairs(self.objects) do
 		obj.ref.draw()
 	end
 
-	this.canvas.renderTo(function()
-		for _, obj in pairs(this.objects) do
+	self.canvas.renderTo(function()
+		for _, obj in pairs(self.objects) do
 			ui.lib.cobalt.graphics.draw(obj.ref.canvas, obj.x, obj.y)
 		end
 	end)
 end
 
 function Container:_mouseReleased(x, y, button)
-	for _, obj in pairs(this.objects) do
+	for _, obj in pairs(self.objects) do
 		local rx = x - obj.x
 		local ry = y - obj.y
 
@@ -42,14 +44,14 @@ function Container:add(object, x, y)
 		y = y
 	}
 
-	for _, value in pairs(this.objects) do
+	for _, value in pairs(self.objects) do
 		if value == obj then
 			return
 		end
 	end
 
-	table.insert(this.objects, obj)
-	object:_setParent(this)
+	table.insert(self.objects, obj)
+	object:_setParent(self)
 end
 
 return Container

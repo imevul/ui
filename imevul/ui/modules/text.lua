@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 
-local Text = ui.lib.class(ui.modules.Object,function(this, data)
+local Text = ui.lib.class(ui.modules.Object, function(this, data)
 	ui.modules.Object.init(this, data)
 	data = data or {}
 	this.text = data.text or ''
@@ -15,9 +15,12 @@ local Text = ui.lib.class(ui.modules.Object,function(this, data)
 end)
 
 function Text:_draw()
-	this.canvas:renderTo(function()
-		ui.lib.cobalt.graphics.print(this.text, 0, 0)
+	self.canvas:renderTo(function()
+		ui.lib.cobalt.graphics.setColor(self.topParent.theme.text)
+		ui.lib.cobalt.graphics.print(self.text, 0, 0)
 	end)
+
+	ui.modules.Object:_draw()
 end
 
 return Text
