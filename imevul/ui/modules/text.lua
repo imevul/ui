@@ -40,14 +40,22 @@ local Text = ui.lib.class(ui.modules.Object, function(this, data)
 end)
 
 function Text:setText(newText)
-	self.text = newText
-	if not self.fixedWidth then
-		self.width = string.len(newText) + math.ceil(self.padding * 2)
-		self.canvas = gfx.newCanvas(self.width, self.height)
+	if self.text == newText then
+		return
 	end
+
+	self.text = newText
+	self:_resizeForText(self.text)
 
 	if self.callbacks.onChange then
 		self.callbacks.onChange(self)
+	end
+end
+
+function Text:_resizeForText(newText)
+	if not self.fixedWidth then
+		self.width = string.len(newText) + math.ceil(self.padding * 2)
+		self.canvas = gfx.newCanvas(self.width, self.height)
 	end
 end
 
@@ -65,6 +73,7 @@ function Text:_draw()
 	elseif self.align == 'right' then
 		tx = math.floor(self.width - self.padding / 2 - string.len(self.text))
 	end
+
 	gfx.print(self.text, tx, ty)
 end
 

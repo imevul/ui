@@ -35,10 +35,11 @@ function Input:_draw()
 	elseif self.align == 'right' then
 		tx = math.floor(self.width - self.padding / 2 - string.len(self.text))
 	end
+
 	gfx.print(self.text, tx, ty)
 end
 
-function Input:_keyReleased(key, keyCode)
+function Input:_keyReleased(key)
 	if key == 'enter' then
 		self:_blur()
 
