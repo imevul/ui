@@ -26,7 +26,7 @@ end)
 function Bar:_draw()
 	local fillPercent = math.min(1.0, math.max(0.0, self.value * 1.0 / self.maxValue))
 
-	gfx.setBackgroundColor(self.background or self.config.theme.blurredBackground)
+	gfx.setBackgroundColor(self.background or self.config.theme.blurredBackground or colors.lightGray)
 	gfx.clear()
 
 	local color = self.color or self.config.theme.primary
@@ -54,7 +54,7 @@ function Bar:_draw()
 
 	gfx.setColor(color)
 	gfx.rect('fill', 0, 0, math.floor(self.width * fillPercent), self.height)
-	gfx.setBackgroundColor(self.config.theme.background)
+	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
 return Bar

@@ -20,8 +20,26 @@ function Button:_draw()
 	gfx.setColor(self.color or self.config.theme.primary)
 	gfx.rect('fill', 0, 0, self.width, self.height)
 	ui.modules.Text._draw(self)
-	gfx.setColor(self.config.theme.text)
-	gfx.setBackgroundColor(self.config.theme.background)
+	gfx.setColor(self.config.theme.text or colors.white)
+	gfx.setBackgroundColor(self.config.theme.background or colors.black)
+end
+
+function Button:click()
+	if self.callbacks.onClick then
+		self.callbacks.onClick(self)
+	end
+end
+
+function Button:_keyReleased(key, keyCode)
+	ui.modules.Text._keyReleased(self, key, keyCode)
+	if key == 'space' then
+		self:click()
+	end
+end
+
+function Button:_mouseReleased(x, y, button)
+	ui.modules.Text._mouseReleased(self, x, y, button)
+	self:click()
 end
 
 return Button

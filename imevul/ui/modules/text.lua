@@ -62,7 +62,7 @@ end
 function Text:_draw()
 	ui.modules.Object._draw(self)
 
-	gfx.setColor(self.config.theme.text)
+	gfx.setColor(self.config.theme.text or colors.white)
 	local tx
 	local ty = math.floor(self.height / 2)
 

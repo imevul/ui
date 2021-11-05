@@ -16,11 +16,11 @@ function Input:_draw()
 	ui.modules.Text._draw(self)
 
 	if self.focused then
-		gfx.setBackgroundColor(colors.white or self.config.theme.focusBackground)
-		gfx.setColor(self.config.theme.focusedText)
+		gfx.setBackgroundColor(self.config.theme.focusedBackground or colors.white)
+		gfx.setColor(self.config.theme.focusedText or colors.black)
 	else
-		gfx.setBackgroundColor(colors.lightGray or self.config.theme.blurredBackground)
-		gfx.setColor(self.config.theme.text)
+		gfx.setBackgroundColor(self.config.theme.blurredBackground or colors.lightGray)
+		gfx.setColor(self.config.theme.text or colors.white)
 	end
 
 	gfx.clear()
@@ -37,9 +37,12 @@ function Input:_draw()
 	end
 
 	gfx.print(self.text, tx, ty)
+	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
-function Input:_keyReleased(key)
+function Input:_keyReleased(key, keyCode)
+	ui.modules.Text._keyReleased(self, key, keyCode)
+
 	if key == 'enter' then
 		self:_blur()
 

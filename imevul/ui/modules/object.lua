@@ -32,7 +32,7 @@ local Object = ui.lib.class(function(this, data)
 end)
 
 function Object:setVisible(visibility)
-	assert(type(visibility) == "boolean")
+	assert(type(visibility) == 'boolean')
 	self.visible = visibility
 
 	if self.callbacks.onSetVisible then
@@ -114,6 +114,18 @@ end
 function Object:_mouseReleased(x, y, button)
 	if self.callbacks.mouseReleased then
 		self.callbacks.mouseReleased(self, x, y, button)
+	end
+end
+
+function Object:_mouseDrag(x, y, button)
+	if self.callbacks.mouseDrag then
+		self.callbacks.mouseDrag(self, x, y, button)
+	end
+end
+
+function Object:_mouseScroll(x, y, direction)
+	if self.callbacks.mouseScroll then
+		self.callbacks.mouseScroll(self, direction, x, y)
 	end
 end
 

@@ -67,7 +67,7 @@ function Container:_mousePressed(x, y, button)
 			local rx = x - obj.x
 			local ry = y - obj.y
 
-			if rx >= 0 and ry >= 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
+			if rx > 0 and ry > 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
 				obj.ref:_focus()
 				obj.ref:_mousePressed(rx, ry, button)
 
@@ -96,14 +96,65 @@ function Container:_mouseReleased(x, y, button)
 			local ry = y - obj.y
 
 			if rx > 0 and ry > 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
-				obj.ref:_focus()
-				obj.ref:_mouseReleased(rx, ry, button)
+				if obj.ref.focused then
+					obj.ref:_mouseReleased(rx, ry, button)
+				end
 
 				if obj.ref.opaque then
 					consumed = true
 				end
-			else
-				obj.ref:_blur()
+			end
+
+			-- Handle modal components
+			if obj.ref.drawOrder == 1/0 then
+				consumed = true
+			end
+		end
+	end
+end
+
+function Container:_mouseDrag(x, y, button)
+	ui.modules.Object._mouseDrag(self, x, y, button)
+	local consumed = false
+
+	for _, obj in pairs(self.objectsReverse) do
+		if obj.ref.visible then
+			local rx = x - obj.x
+			local ry = y - obj.y
+
+			if rx > 0 and ry > 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
+				if obj.ref.focused then
+					obj.ref:_mouseDrag(rx, ry, button)
+				end
+
+				if obj.ref.opaque then
+					consumed = true
+				end
+			end
+
+			-- Handle modal components
+			if obj.ref.drawOrder == 1/0 then
+				consumed = true
+			end
+		end
+	end
+end
+
+function Container:_mouseScroll(x, y, direction)
+	ui.modules.Object._mouseScroll(self, x, y, direction)
+	local consumed = false
+
+	for _, obj in pairs(self.objectsReverse) do
+		if obj.ref.visible then
+			local rx = x - obj.x
+			local ry = y - obj.y
+
+			if rx > 0 and ry > 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
+				obj.ref:_mouseScroll(rx, ry, direction)
+
+				if obj.ref.opaque then
+					consumed = true
+				end
 			end
 
 			-- Handle modal components

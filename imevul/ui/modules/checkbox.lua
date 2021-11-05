@@ -8,14 +8,17 @@ Toggle on or off.
 ]]--
 local Checkbox = ui.lib.class(ui.modules.Text, function(this, data)
 	data = data or {}
+	this.prefix = '[ ]'
+	this.prefixOn = '[X]'
+	this.prefixOff = '[ ]'
 	data.text = data.text or ''
-	data.text = '[ ] ' .. data.text
+	data.text = this.prefix .. ' ' .. data.text
 	ui.modules.Text.init(this, data)
 
 	data.value = data.value or false
 
 	this.value = data.value
-	this.type = 'Input'
+	this.type = 'Checkbox'
 end)
 
 function Checkbox:setText(newText)
@@ -23,10 +26,8 @@ function Checkbox:setText(newText)
 		return
 	end
 
-	local prefix = '[ ] '
-
-	if newText:sub(0, string.len(prefix)) ~= prefix then
-		newText = prefix .. newText
+	if newText:sub(0, string.len(self.prefix)) ~= self.prefix then
+		newText = self.prefix .. ' ' .. newText
 	end
 
 	self.text = newText
@@ -39,11 +40,11 @@ function Checkbox:_draw()
 	ui.modules.Text._draw(self)
 
 	if self.focused then
-		gfx.setBackgroundColor(colors.white or self.config.theme.focusBackground)
-		gfx.setColor(self.config.theme.focusedText)
+		gfx.setBackgroundColor(self.config.theme.focusedBackground or colors.white)
+		gfx.setColor(self.config.theme.focusedText or colors.black)
 	else
-		gfx.setBackgroundColor(colors.lightGray or self.config.theme.blurredBackground)
-		gfx.setColor(self.config.theme.text)
+		gfx.setBackgroundColor(self.config.theme.blurredBackground or colors.lightGray)
+		gfx.setColor(self.config.theme.text or colors.white)
 	end
 
 	local tx
@@ -58,9 +59,9 @@ function Checkbox:_draw()
 	end
 
 	if self.value then
-		gfx.print('X', tx + 1, ty)
+		gfx.print(self.prefixOn, tx, ty)
 	else
-		gfx.print(' ', tx + 1, ty)
+		gfx.print(self.prefixOff, tx, ty)
 	end
 
 	gfx.setBackgroundColor(colors.black or self.config.theme.background)
@@ -74,13 +75,15 @@ function Checkbox:toggle()
 	end
 end
 
-function Checkbox:_keyReleased(key)
+function Checkbox:_keyReleased(key, keyCode)
+	ui.modules.Text._keyReleased(self, key, keyCode)
 	if key == 'space' then
 		self:toggle()
 	end
 end
 
-function Checkbox:_mouseReleased()
+function Checkbox:_mouseReleased(x, y, button)
+	ui.modules.Text._mouseReleased(self, x, y, button)
 	self:toggle()
 end
 

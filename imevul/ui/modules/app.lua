@@ -76,6 +76,10 @@ function App:initialize()
 		self:_keyReleased(key, keyCode)
 	end
 
+	cobalt.mousepressed = function(x, y, button)
+		self:_mousePressed(x, y, button)
+	end
+
 	cobalt.mousereleased = function(x, y, button)
 		self:_mouseReleased(x, y, button)
 	end
@@ -85,7 +89,13 @@ function App:initialize()
 	end
 
 	cobalt.eventhandler = function (event, a, b, c, d, e)
-		self:_eventHandler(event, a, b, c, d, e)
+		if event == 'mouse_drag' then
+			self:_mouseDrag(b, c, a)
+		elseif event == 'mouse_scroll' then
+			self:_mouseScroll(b, c, a)
+		else
+			self:_eventHandler(event, a, b, c, d, e)
+		end
 	end
 
 	ui.lib.cobalt.init()

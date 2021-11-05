@@ -32,8 +32,10 @@ UI_ModalWindow = loadModule('ModalWindow')
 UI_Text = loadModule('Text')
 UI_Input = loadModule('Input')
 UI_Checkbox = loadModule('Checkbox')
+UI_ToggleButton = loadModule('ToggleButton')
 UI_Button = loadModule('Button')
 UI_Bar = loadModule('Bar')
+UI_Slider = loadModule('Slider')
 UI_App = loadModule('App')
 
 return ui
