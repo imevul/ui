@@ -252,4 +252,12 @@ function Container:_sortComponents(array, reverse)
 	end)
 end
 
+function Container:_inheritConfig(config)
+	ui.modules.Object._inheritConfig(self, config)
+
+	for _, obj in pairs(self.objects) do
+		obj.ref:_inheritConfig(config)
+	end
+end
+
 return Container

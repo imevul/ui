@@ -10,7 +10,7 @@ local Slider = ui.lib.class(ui.modules.Bar, function(this, data)
 	ui.modules.Bar.init(this, data)
 
 	this.step = data.step or 1
-	this.style = data.style or Slider.STYLE_SLIDER
+	this.style = data.style or ui.modules.Slider.STYLE_SLIDER
 	this.type = 'Slider'
 end)
 

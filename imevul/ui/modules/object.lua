@@ -31,6 +31,19 @@ local Object = ui.lib.class(function(this, data)
 	this.canvas = gfx.newCanvas(this.width, this.height)
 end)
 
+function Object:resize(width, height)
+	assert(width > 0)
+	assert(height > 0)
+
+	self.width = width
+	self.height = height
+	self.canvas = gfx.newCanvas(self.width, self.height)
+
+	if self.callbacks.onResize then
+		self.callbacks.onResize(self, width, height)
+	end
+end
+
 function Object:setVisible(visibility)
 	assert(type(visibility) == 'boolean')
 	self.visible = visibility

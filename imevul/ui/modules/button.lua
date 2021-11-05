@@ -6,7 +6,7 @@ local gfx = ui.lib.cobalt.graphics
 Class Button
 Builds on top of the Text class, but also draws an outline
 ]]--
-local Button = ui.lib.class(ui.modules.Text,function(this, data)
+local Button = ui.lib.class(ui.modules.Text, function(this, data)
 	ui.modules.Text.init(this, data)
 
 	data = data or {}
