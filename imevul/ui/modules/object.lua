@@ -18,6 +18,7 @@ local Object = ui.lib.class(function(this, data)
 
 	objectId = objectId + 1
 	this.id = objectId
+	this.parent = nil
 	this.type = 'Object'
 	this.width = data.width
 	this.height = data.height
@@ -45,6 +46,15 @@ end
 
 function Object:_inheritConfig(config)
 	self.config = config or {}
+end
+
+function Object:_findTopLevelComponent()
+	local tlc = self
+	while tlc.parent and tlc ~= tlc.parent do
+		tlc = tlc.parent
+	end
+
+	return tlc
 end
 
 --[[

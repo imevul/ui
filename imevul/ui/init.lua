@@ -28,6 +28,7 @@ end
 UI_Object = loadModule('Object')
 UI_Container = loadModule('Container')
 UI_Window = loadModule('Window')
+UI_ModalWindow = loadModule('ModalWindow')
 UI_Text = loadModule('Text')
 UI_Input = loadModule('Input')
 UI_Checkbox = loadModule('Checkbox')

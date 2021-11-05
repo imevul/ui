@@ -77,6 +77,11 @@ function Container:_mousePressed(x, y, button)
 			else
 				obj.ref:_blur()
 			end
+
+			-- Handle modal components
+			if obj.ref.drawOrder == 1/0 then
+				consumed = true
+			end
 		end
 	end
 end
@@ -99,6 +104,11 @@ function Container:_mouseReleased(x, y, button)
 				end
 			else
 				obj.ref:_blur()
+			end
+
+			-- Handle modal components
+			if obj.ref.drawOrder == 1/0 then
+				consumed = true
 			end
 		end
 	end
@@ -140,6 +150,7 @@ function Container:add(object, x, y)
 		end
 	end
 
+	object.parent = self
 	object:_inheritConfig(self.config)
 	table.insert(self.objects, obj)
 
@@ -150,6 +161,7 @@ end
 function Container:remove(object)
 	for i, obj in ipairs(self.objects) do
 		if obj.ref == object then
+			object.parent = nil
 			table.remove(self.objects, i)
 			self:_copyReverse()
 			break
