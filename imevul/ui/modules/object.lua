@@ -21,11 +21,27 @@ local Object = ui.lib.class(function(this, data)
 	this.type = 'Object'
 	this.width = data.width
 	this.height = data.height
+	this.visible = data.visible or true
+	this.drawOrder = data.drawOrder or 0
+	this.opaque = data.opaque or true
 	this.config = data.config
 	this.callbacks = data.callbacks
 	this.focused = false
 	this.canvas = gfx.newCanvas(this.width, this.height)
 end)
+
+function Object:setVisible(visibility)
+	assert(type(visibility) == "boolean")
+	self.visible = visibility
+
+	if self.callbacks.onSetVisible then
+		self.callbacks.onSetVisible(self, visibility)
+	end
+
+	if not self.visible then
+		self:_blur()
+	end
+end
 
 function Object:_inheritConfig(config)
 	self.config = config or {}

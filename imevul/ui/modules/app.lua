@@ -8,8 +8,9 @@ The main container for the application. Handles hooks into cobalt and rendering 
 ]]--
 local App = ui.lib.class(ui.modules.Container, function(this, data)
 	data = data or {}
-	data.width = data.width or 51
-	data.height = data.height or 19
+	local termSize = {term.getSize()}
+	data.width = data.width or termSize[1] or 51
+	data.height = data.height or termSize[2] or 19
 
 	data.config = data.config or {
 		theme = {

@@ -13,11 +13,12 @@ local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	data.color = data.color or nil
 	this.title = data.title or ''
 	this.color = data.color
+	this.background = data.background or nil
 	this.type = 'Window'
 end)
 
 function Window:_draw()
-	gfx.setBackgroundColor(self.config.theme.background)
+	gfx.setBackgroundColor(self.background or self.config.theme.background)
 	gfx.clear()
 
 	gfx.setColor(self.color or self.config.theme.primary)
