@@ -18,13 +18,23 @@ ui.printDebug = function(text)
 	end
 end
 
-ui.loadModule = function(module)
+ui.loadModule = function(module, subPath)
+	subPath = subPath or ''
+	if #subPath > 0 then
+		subPath = subPath .. '/'
+	end
+
 	ui.printDebug('Loading module ' .. module)
-	ui.modules[module] = loadfile(ui.config.path .. '/modules/' .. string.lower(module) .. '.lua')(ui)
+	ui.modules[module] = loadfile(ui.config.path .. '/modules/' .. subPath .. string.lower(module) .. '.lua')(ui)
 	return ui.modules[module]
 end
 
 -- Make modules easily available
+UI_Direction	= ui.loadModule('Direction', 'enums')
+
+UI_Layout		= ui.loadModule('Layout', 'layouts')
+UI_ListLayout	= ui.loadModule('ListLayout', 'layouts')
+
 UI_Object		= ui.loadModule('Object')
 UI_Container	= ui.loadModule('Container')
 UI_Window		= ui.loadModule('Window')
@@ -32,6 +42,7 @@ UI_ModalWindow	= ui.loadModule('ModalWindow')
 UI_Panel		= ui.loadModule('Panel')
 UI_TabPanel		= ui.loadModule('TabPanel')
 UI_ScrollPanel	= ui.loadModule('ScrollPanel')
+UI_List			= ui.loadModule('List')
 UI_Text			= ui.loadModule('Text')
 UI_Image		= ui.loadModule('Image')
 UI_Input		= ui.loadModule('Input')

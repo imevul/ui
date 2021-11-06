@@ -34,6 +34,7 @@ local Text = ui.lib.class(ui.modules.Object, function(this, data)
 	this.width = data.width
 	this.padding = data.padding
 	this.align = data.align
+	this.color = data.color or nil
 
 	ui.modules.Object.init(this, data)
 	this.type = 'Text'
@@ -62,7 +63,7 @@ end
 function Text:_draw()
 	ui.modules.Object._draw(self)
 
-	gfx.setColor(self.config.theme.text or colors.white)
+	gfx.setColor(self.color or self.config.theme.text or colors.white)
 	local tx
 	local ty = math.floor(self.height / 2)
 

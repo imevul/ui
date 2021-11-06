@@ -10,6 +10,7 @@ local Container = ui.lib.class(ui.modules.Object, function(this, data)
 	ui.modules.Object.init(this, data)
 
 	data = data or {}
+	this.layout = data.layout or nil
 	this.objects = {}
 	this.objectsReverse = {}
 	this.type = 'Container'
@@ -205,8 +206,7 @@ function Container:add(object, x, y)
 	object:_inheritConfig(self.config)
 	table.insert(self.objects, obj)
 
-	self:_sortComponents(self.objects)
-	self:_copyReverse()
+	self:update()
 end
 
 function Container:remove(object)
@@ -214,9 +214,18 @@ function Container:remove(object)
 		if obj.ref == object then
 			object.parent = nil
 			table.remove(self.objects, i)
-			self:_copyReverse()
+			self:update()
 			break
 		end
+	end
+end
+
+function Container:update()
+	self:_sortComponents(self.objects)
+	self:_copyReverse()
+
+	if self.layout then
+		self.layout:update(self.objects)
 	end
 end
 

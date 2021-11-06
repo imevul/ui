@@ -14,12 +14,14 @@ local ScrollPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 	this.offsetY = 0
 	this.maxWidth = this.width
 	this.maxHeight = this.height
-	this.scrollDirection = data.scrollDirection or ui.modules.ScrollPanel.DIR_VERTICAL
+
+	if data.autoResize == nil then
+		data.autoResize = true
+	end
+
+	this.autoResize = data.autoResize
+	this.scrollDirection = data.scrollDirection or ui.modules.Direction.VERTICAL
 end)
-
-ScrollPanel.DIR_VERTICAL = 0
-ScrollPanel.DIR_HORIZONTAL = 1
-
 
 function ScrollPanel:_drawObjects()
 	gfx.currentCanvas.surface.overwrite = self.overwrite
@@ -62,7 +64,7 @@ end
 function ScrollPanel:_mouseScroll(x, y, direction)
 	ui.modules.Panel._mouseScroll(self, x + self.offsetY, y + self.offsetY, direction)
 
-	if self.scrollDirection == ScrollPanel.DIR_VERTICAL then
+	if self.scrollDirection == ui.modules.Direction.VERTICAL then
 		self:scrollY(direction)
 	else
 		self:scrollX(direction)
@@ -82,24 +84,26 @@ function ScrollPanel:remove(object)
 end
 
 function ScrollPanel:_updateSize()
-	local width = self.width
-	local height = self.height
+	if self.autoResize then
+		local width = self.width
+		local height = self.height
 
-	for _, obj in pairs(self.objects) do
-		width = math.max(width, obj.x + obj.ref.width)
-		height = math.max(height, obj.y + obj.ref.height)
-	end
+		for _, obj in pairs(self.objects) do
+			width = math.max(width, obj.x + obj.ref.width)
+			height = math.max(height, obj.y + obj.ref.height)
+		end
 
-	self.maxWidth = math.max(self.width, width)
-	self.maxHeight = math.max(self.height, height)
+		self.maxWidth = math.max(self.width, width)
+		self.maxHeight = math.max(self.height, height)
 
-	if self.callbacks.onResize then
-		self.callbacks.onResize(self, self.maxWidth, self.maxHeight)
+		if self.callbacks.onResize then
+			self.callbacks.onResize(self, self.maxWidth, self.maxHeight)
+		end
 	end
 end
 
 function ScrollPanel:scrollX(amount)
-	self.offsetX = math.min(self.maxWidth, math.max(0, self.offsetX + amount))
+	self.offsetX = math.min(self.maxWidth - self.width, math.max(0, self.offsetX + amount))
 
 	if self.callbacks.onScroll then
 		self.callbacks.onScroll(self, self.offsetX, self.offsetY, amount, 0)
@@ -107,10 +111,22 @@ function ScrollPanel:scrollX(amount)
 end
 
 function ScrollPanel:scrollY(amount)
-	self.offsetY = math.min(self.maxHeight, math.max(0, self.offsetY + amount))
+	self.offsetY = math.min(self.maxHeight - self.height, math.max(0, self.offsetY + amount))
 
 	if self.callbacks.onScroll then
 		self.callbacks.onScroll(self, self.offsetX, self.offsetY, 0, amount)
+	end
+end
+
+function ScrollPanel:scrollTo(x, y, noEvent)
+	local amountX = x - self.offsetX
+	local amountY = y - self.offsetY
+
+	self.offsetX = math.min(self.maxWidth - self.width, math.max(0, x))
+	self.offsetY = math.min(self.maxHeight - self.height, math.max(0, y))
+
+	if self.callbacks.onScroll and not noEvent then
+		self.callbacks.onScroll(self, self.offsetX, self.offsetY, amountX, amountY)
 	end
 end
 

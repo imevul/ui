@@ -35,35 +35,57 @@ function Slider:_draw()
 
 	gfx.clear()
 
-	--gfx.rect('fill', math.max(0, math.floor(self.width * fillPercent) - 1), 0, 1, 1)
-	gfx.pixel(math.max(0, math.floor(self.width * fillPercent) - 1), 0)
-	if self.align == 'left' then
-		tx = math.ceil(self.padding / 2)
-	elseif self.align == 'center' then
-		tx = math.floor((self.width - string.len(self.text)) / 2)
-	elseif self.align == 'right' then
-		tx = math.floor(self.width - self.padding / 2 - string.len(self.text))
+	if self.direction == ui.modules.Direction.HORIZONTAL then
+		if self.reverse then
+			gfx.pixel(math.max(0, math.floor(self.width - self.width * fillPercent) - 1), 0)
+		else
+			gfx.pixel(math.max(0, math.floor(self.width * fillPercent) - 1), 0)
+		end
+	else
+		if self.reverse then
+			gfx.pixel(0, math.max(0, math.floor(self.height - self.height * fillPercent) - 1))
+		else
+			gfx.pixel(0, math.max(0, math.floor(self.height * fillPercent) - 1))
+		end
 	end
 
-	--gfx.print(tostring(self.value), tx, 0);
 	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
-function Slider:setValue(value)
-	self.value = math.min(self.maxValue, math.max(0.0, value))
-
-	if self.callbacks.onChange then
-		self.callbacks.onChange(self)
+function Slider:setValueFromPoint(x, y)
+	local percent
+	if self.direction == ui.modules.Direction.HORIZONTAL then
+		percent = math.min(1.0, math.max(0.0, x * 1.0 / self.width))
+	else
+		percent = math.min(1.0, math.max(0.0, y * 1.0 / self.height))
 	end
+
+	if self.reverse then
+		percent = 1 - percent
+	end
+
+	self:setValue(math.floor(percent * self.maxValue))
 end
 
 function Slider:_keyPressed(key, keyCode)
 	ui.modules.Bar._keyPressed(self, key, keyCode)
+	local rv = 1
+	if self.reverse then
+		rv = -1
+	end
 
-	if key == 'left' then
-		self:setValue(self.value - self.step)
-	elseif key == 'right' then
-		self:setValue(self.value + self.step)
+	if self.direction == ui.modules.Direction.HORIZONTAL then
+		if key == 'left' then
+			self:setValue(self.value - self.step * rv)
+		elseif key == 'right' then
+			self:setValue(self.value + self.step * rv)
+		end
+	else
+		if key == 'up' then
+			self:setValue(self.value - self.step * rv)
+		elseif key == 'down' then
+			self:setValue(self.value + self.step * rv)
+		end
 	end
 end
 
@@ -71,7 +93,7 @@ function Slider:_mousePressed(x, y, button)
 	ui.modules.Bar._mousePressed(self, x, y, button)
 
 	if button == 1 then
-		self:setValue(math.min(1.0, math.max(0.0, x * 1.0 / self.width)) * self.maxValue)
+		self:setValueFromPoint(x, y)
 	end
 end
 
@@ -79,12 +101,8 @@ function Slider:_mouseDrag(x, y, button)
 	ui.modules.Bar._mouseDrag(self, x, y, button)
 
 	if button == 1 then
-		self:setValue(math.min(1.0, math.max(0.0, x * 1.0 / self.width)) * self.maxValue)
+		self:setValueFromPoint(x, y)
 	end
-end
-
-function Slider:_mouseReleased(x, y, button)
-	ui.modules.Bar._mousePressed(self, x, y, button)
 end
 
 return Slider

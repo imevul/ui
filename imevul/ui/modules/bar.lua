@@ -15,11 +15,17 @@ local Bar = ui.lib.class(ui.modules.Object, function(this, data)
 	data.color = data.color or nil
 	data.gradient = data.gradient or 0
 	assert(data.maxValue > 0, 'MaxValue must be higher than 0')
+	data.reverse = data.reverse or false
 
 	this.value = data.value
+	this.minValue = 0
 	this.maxValue = data.maxValue
+	this:setMaxValue(this.maxValue)
+
 	this.color = data.color
 	this.gradient = data.gradient
+	this.direction = data.direction or ui.modules.Direction.HORIZONTAL
+	this.reverse = data.reverse
 	this.type = 'Bar'
 end)
 
@@ -53,8 +59,35 @@ function Bar:_draw()
 	end
 
 	gfx.setColor(color)
-	gfx.rect('fill', 0, 0, math.floor(self.width * fillPercent), self.height)
+
+	if self.direction == ui.modules.Direction.HORIZONTAL then
+		if self.reverse then
+			gfx.rect('fill', self.width - math.floor(self.width * fillPercent), 0, math.floor(self.width * fillPercent), self.height)
+		else
+			gfx.rect('fill', 0, 0, math.floor(self.width * fillPercent), self.height)
+		end
+	else
+		if self.reverse then
+			gfx.rect('fill', 0, self.height - math.floor(self.height * fillPercent), self.width, math.floor(self.height * fillPercent))
+		else
+			gfx.rect('fill', 0, 0, self.width, math.floor(self.height * fillPercent))
+		end
+	end
+
 	gfx.setBackgroundColor(self.config.theme.background or colors.black)
+end
+
+function Bar:setValue(value, noEvent)
+	self.value = math.min(self.maxValue, math.max(self.minValue, value))
+
+	if self.callbacks.onChange and not noEvent then
+		self.callbacks.onChange(self, self.value)
+	end
+end
+
+function Bar:setMaxValue(maxValue)
+	self.maxValue = math.max(self.minValue, maxValue)
+	self:setValue(self.value)
 end
 
 return Bar

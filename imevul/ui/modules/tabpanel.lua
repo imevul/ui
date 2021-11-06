@@ -15,7 +15,6 @@ local TabPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 	this.tabs = data.tabs or {_ = ui.modules.Panel({
 		width = this.width,
 		height = this.height - tabHeight,
-		background = colors.pink,
 		border = false
 	})}
 
@@ -42,7 +41,7 @@ local TabPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 			text = tabData.name,
 			padding = 1,
 			index = tabIndex,
-			color = this.tabColor,
+			background = this.tabColor,
 			callbacks = {
 				onClick = function(button)
 					this:switchTab(button.index)
@@ -69,10 +68,10 @@ function TabPanel:switchTab(index)
 	for i, tabData in pairs(self.tabs) do
 		if i == index then
 			tabData.tab:setVisible(true)
-			self._tabButtons[i].color = tabData.tab.background
+			self._tabButtons[i].background = tabData.tab.background
 		else
 			tabData.tab:setVisible(false)
-			self._tabButtons[i].color = self._tabButtons[i].originalColor
+			self._tabButtons[i].background = self._tabButtons[i].originalBackground
 		end
 	end
 end

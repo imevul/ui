@@ -9,7 +9,7 @@ local TabButton = ui.lib.class(ui.modules.Button, function(this, data)
 	ui.modules.Button.init(this, data)
 
 	data = data or {}
-	this.originalColor = data.color or nil
+	this.originalBackground = data.background or nil
 	this.index = data.index or 1
 	this.type = 'TabButton'
 end)
