@@ -47,8 +47,20 @@ function ScrollPanel:_draw()
 	ui.modules.Container._draw(self)
 end
 
+function ScrollPanel:_mousePressed(x, y, button)
+	ui.modules.Panel._mousePressed(self, x + self.offsetX, y + self.offsetY, button)
+end
+
+function ScrollPanel:_mouseReleased(x, y, button)
+	ui.modules.Panel._mouseReleased(self, x + self.offsetX, y + self.offsetY, button)
+end
+
+function ScrollPanel:_mouseDrag(x, y, button)
+	ui.modules.Panel._mouseDrag(self, x + self.offsetX, y + self.offsetY, button)
+end
+
 function ScrollPanel:_mouseScroll(x, y, direction)
-	ui.modules.Panel._mouseScroll(self, x, y, direction)
+	ui.modules.Panel._mouseScroll(self, x + self.offsetY, y + self.offsetY, direction)
 
 	if self.scrollDirection == ScrollPanel.DIR_VERTICAL then
 		self:scrollY(direction)
