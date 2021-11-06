@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
 --[[
@@ -15,6 +16,20 @@ local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	this.color = data.color
 	this.background = data.background or nil
 	this.type = 'Window'
+	this.padding = data.padding or 2
+
+	if data.closeButton then
+		this:add(UI_Button({
+			text = 'X',
+			background = colors.red,
+			absolute = true,
+			callbacks = {
+				onClick = function()
+					this:close()
+				end
+			}
+		}), -1, 0)
+	end
 end)
 
 function Window:_draw()
@@ -29,6 +44,15 @@ function Window:_draw()
 	gfx.setBackgroundColor(self.config.theme.background)
 
 	ui.modules.Container._draw(self)
+end
+
+function Window:close()
+	if self.parent then
+		self.parent:remove(self)
+	else
+		self:setVisible(false)
+		self:_remove()
+	end
 end
 
 return Window

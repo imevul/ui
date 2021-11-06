@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
 --[[
@@ -26,7 +27,7 @@ end)
 function ScrollPanel:_drawObjects()
 	gfx.currentCanvas.surface.overwrite = self.overwrite
 	for _, obj in pairs(self.objects) do
-		if obj.ref.visible then
+		if obj.ref.visible and obj.ref.canvas then
 			obj.ref:_render()
 			gfx.draw(obj.ref.canvas, obj.x - self.offsetX, obj.y - self.offsetY)
 		end
@@ -47,6 +48,8 @@ function ScrollPanel:_draw()
 	end
 
 	ui.modules.Container._draw(self)
+
+	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
 function ScrollPanel:_mousePressed(x, y, button)
@@ -84,7 +87,7 @@ function ScrollPanel:remove(object)
 end
 
 function ScrollPanel:_updateSize()
-	if self.autoResize then
+	if self.autoResize and self.width and self.height then
 		local width = self.width
 		local height = self.height
 
@@ -103,6 +106,9 @@ function ScrollPanel:_updateSize()
 end
 
 function ScrollPanel:scrollX(amount)
+	if not (self.width and self.maxWidth) then
+		return
+	end
 	self.offsetX = math.min(self.maxWidth - self.width, math.max(0, self.offsetX + amount))
 
 	if self.callbacks.onScroll then
@@ -111,6 +117,9 @@ function ScrollPanel:scrollX(amount)
 end
 
 function ScrollPanel:scrollY(amount)
+	if not (self.height and self.maxHeight) then
+		return
+	end
 	self.offsetY = math.min(self.maxHeight - self.height, math.max(0, self.offsetY + amount))
 
 	if self.callbacks.onScroll then
@@ -119,6 +128,10 @@ function ScrollPanel:scrollY(amount)
 end
 
 function ScrollPanel:scrollTo(x, y, noEvent)
+	if not (self.width and self.maxWidth and self.height and self.maxHeight) then
+		return
+	end
+
 	local amountX = x - self.offsetX
 	local amountY = y - self.offsetY
 

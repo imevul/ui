@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 
 --[[
 Class Layout

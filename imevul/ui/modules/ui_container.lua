@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
 --[[
@@ -15,6 +16,19 @@ local Container = ui.lib.class(ui.modules.Object, function(this, data)
 	this.objectsReverse = {}
 	this.type = 'Container'
 	this.overwrite = data.overwrite or true
+	this.padding = data.padding or 1
+
+	if data.items then
+		for i, item in ipairs(data.items) do
+			if not item.absolute then
+				if item.drawOrder == 0 or item.drawOrder then
+					item.drawOrder = i
+				end
+			end
+
+			this:add(item)
+		end
+	end
 end)
 
 function Container:_draw()
@@ -30,7 +44,7 @@ MUST be within own canvas renderTo context!
 function Container:_drawObjects()
 	gfx.currentCanvas.surface.overwrite = self.overwrite
 	for _, obj in pairs(self.objects) do
-		if obj.ref.visible then
+		if obj.ref.visible and obj.ref.canvas then
 			obj.ref:_render()
 			gfx.draw(obj.ref.canvas, obj.x, obj.y)
 		end
@@ -189,6 +203,14 @@ function Container:add(object, x, y)
 	x = x or 0
 	y = y or 0
 
+	if x < 0 then
+		x = (self.width or 0) + x
+	end
+
+	if y < 0 then
+		y = (self.height or 0) + y
+	end
+
 	local obj = {
 		ref = object,
 		x = x,
@@ -205,27 +227,38 @@ function Container:add(object, x, y)
 	object.parent = self
 	object:_inheritConfig(self.config)
 	table.insert(self.objects, obj)
-
 	self:update()
+	object:_add()
+
+	return self
 end
 
 function Container:remove(object)
-	for i, obj in ipairs(self.objects) do
+	local index = 1
+	for _, obj in pairs(self.objects) do
 		if obj.ref == object then
 			object.parent = nil
-			table.remove(self.objects, i)
+			table.remove(self.objects, index)
 			self:update()
+			object:_remove()
 			break
 		end
+		index = index + 1
 	end
 end
 
-function Container:update()
+function Container:update(skipLayout)
+	ui.modules.Object.update(self)
+
+	for _, obj in pairs(self.objects) do
+		obj.ref:update()
+	end
+
 	self:_sortComponents(self.objects)
 	self:_copyReverse()
 
-	if self.layout then
-		self.layout:update(self.objects)
+	if self.layout and not skipLayout then
+		self.layout:update(self.objects, self)
 	end
 end
 
@@ -267,6 +300,52 @@ function Container:_inheritConfig(config)
 	for _, obj in pairs(self.objects) do
 		obj.ref:_inheritConfig(config)
 	end
+end
+
+function Container:indexOf(child)
+	for i, obj in ipairs(self.objects) do
+		if obj.ref == child then
+			return i
+		end
+	end
+
+	return nil
+end
+
+function Container:child(index)
+	for i, obj in ipairs(self.objects) do
+		if i == index then
+			return obj.ref
+		end
+	end
+end
+
+function Container:childByName(name, recursive)
+	for _, obj in pairs(self.objects) do
+		if obj.ref.name == name then
+			return obj.ref
+		end
+	end
+
+	if recursive then
+		local result
+		for _, obj in pairs(self.objects) do
+			result = obj.ref:childByName(name, recursive)
+			if result then
+				return result
+			end
+		end
+	end
+end
+
+function Container:getPositionOf(child)
+	for _, obj in pairs(self.objects) do
+		if obj.ref == child then
+			return obj.x, obj.y
+		end
+	end
+
+	return ui.modules.Object.gePositionOf(child)
 end
 
 return Container

@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
 --[[
@@ -11,14 +12,15 @@ local Bar = ui.lib.class(ui.modules.Object, function(this, data)
 
 	data = data or {}
 	data.value = data.value or 0
+	data.minValue = 0
 	data.maxValue = data.maxValue or 100
 	data.color = data.color or nil
 	data.gradient = data.gradient or 0
-	assert(data.maxValue > 0, 'MaxValue must be higher than 0')
+	assert(data.maxValue >= data.minValue, 'maxValue (' .. data.maxValue .. ') must be >= minValue (' .. data.minValue .. ')')
 	data.reverse = data.reverse or false
 
 	this.value = data.value
-	this.minValue = 0
+	this.minValue = data.minValue
 	this.maxValue = data.maxValue
 	this:setMaxValue(this.maxValue)
 

@@ -1,12 +1,18 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 
 --[[
 Class List
 Container with a border and a title
 ]]--
 local List = ui.lib.class(ui.modules.Panel, function(this, data)
+	local items = data.items or {}
+	data.items = {}
+
 	ui.modules.Panel.init(this, data)
+
+	data.items = items
 
 	if data.scrollbar == nil then
 		data.scrollbar = true
@@ -19,7 +25,7 @@ local List = ui.lib.class(ui.modules.Panel, function(this, data)
 	end
 
 	this._list = ui.modules.ScrollPanel({
-		width = this.width - scrollbarSize,
+		width = this.width,
 		height = this.height,
 		background = data.background or nil,
 		layout = data.layout or ui.modules.ListLayout({container = this}),
@@ -40,6 +46,11 @@ local List = ui.lib.class(ui.modules.Panel, function(this, data)
 			if data.color then
 				item.color = data.color
 			end
+			if data.background then
+				item.background = data.background
+			else
+				item.background = item.background or this.background
+			end
 			item.drawOrder = drawOrder
 			this._list:add(item)
 			drawOrder = drawOrder + 1
@@ -51,14 +62,14 @@ local List = ui.lib.class(ui.modules.Panel, function(this, data)
 			height = this.height,
 			direction = ui.modules.Direction.VERTICAL,
 			value = 0,
-			maxValue = #data.items - this.height,
+			maxValue = math.max(0, #data.items - (this.height or 0)),
 			callbacks = {
 				onChange = function(_, value)
 					this._list:scrollTo(0, value, true)
 				end
 			}
 		})
-		this:add(this._slider, this.width - scrollbarSize)
+		this:add(this._slider, -scrollbarSize)
 	end
 
 	this.type = 'List'
@@ -68,7 +79,7 @@ function List:update()
 	ui.modules.Panel.update(self)
 
 	if self._slider then
-		self._slider:setMaxValue(#self._list.objects - self.height)
+		self._slider:setMaxValue(#self._list.objects - (self.height or 0))
 	end
 end
 

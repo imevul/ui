@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 local objectId = 0
 
@@ -9,35 +10,50 @@ Base object that all other UI elements inherit from.
 ]]--
 local Object = ui.lib.class(function(this, data)
 	data = data or {}
-	data.width = data.width or 1
-	data.height = data.height or 1
+	data.width = data.width or nil
+	data.height = data.height or nil
 	data.callbacks = data.callbacks or {}
 	data.config = data.config or {}
-	assert(data.width > 0)
-	assert(data.height > 0)
+	if data.visible == nil then
+		data.visible = true
+	end
+	if data.opaque == nil then
+		data.opaque = true
+	end
 
 	objectId = objectId + 1
 	this.id = objectId
+	this.name = data.name or nil
 	this.parent = nil
 	this.type = 'Object'
 	this.width = data.width
 	this.height = data.height
-	this.visible = data.visible or true
+	this.visible = data.visible
 	this.drawOrder = data.drawOrder or 0
-	this.opaque = data.opaque or true
+	this.absolute = data.absolute or false
+	this.opaque = data.opaque
 	this.config = data.config
 	this.callbacks = data.callbacks
 	this.focused = false
-	this.canvas = gfx.newCanvas(this.width, this.height)
+	this.canvas = nil
+	this:createCanvas()
 end)
 
-function Object:resize(width, height)
-	assert(width > 0)
-	assert(height > 0)
+function Object:createCanvas()
+	local width = self.width or 0
+	local height = self.height or 0
 
+	if width > 0 and height > 0 then
+		self.canvas = gfx.newCanvas(width, height)
+	else
+		self.canvas = nil
+	end
+end
+
+function Object:resize(width, height)
 	self.width = width
 	self.height = height
-	self.canvas = gfx.newCanvas(self.width, self.height)
+	self:createCanvas()
 
 	if self.callbacks.onResize then
 		self.callbacks.onResize(self, width, height)
@@ -70,6 +86,55 @@ function Object:_findTopLevelComponent()
 	return tlc
 end
 
+function Object:indexOf(_)
+	return nil
+end
+
+function Object:child(_)
+	return nil
+end
+
+function Object:childByName(_)
+	return nil
+end
+
+function Object:sibling(relativePos)
+	if not self.parent then
+		return nil
+	end
+
+	local index = self.parent:indexOf(self)
+	return self.parent:child(index + relativePos)
+end
+
+function Object:getPositionOf(_)
+	return 0, 0
+end
+
+function Object:getPositionIn(parent)
+	assert(self ~= parent, 'Can not get position inside itself')
+	local current = self
+	local prev
+	local xo = 0
+	local yo = 0
+	while current and current ~= current.parent do
+		prev = current
+		current = current.parent
+
+		if current then
+			local tx, ty = current:getPositionOf(prev)
+			xo = xo + tx
+			yo = yo + ty
+
+			if current == parent then
+				break
+			end
+		end
+	end
+
+	return xo, yo
+end
+
 --[[
 Draw the actual object to it's own canvas.
 MUST be within own canvas renderTo context!
@@ -81,9 +146,11 @@ end
 Render the result of _draw() to the canvas
 ]]--
 function Object:_render()
-	self.canvas:renderTo(function()
-		self:_draw()
-	end)
+	if self.canvas then
+		self.canvas:renderTo(function()
+			self:_draw()
+		end)
+	end
 end
 
 function Object:_focus()
@@ -103,6 +170,41 @@ function Object:_blur()
 		if self.callbacks.onBlur then
 			self.callbacks.onBlur(self)
 		end
+	end
+end
+
+function Object:_add()
+	if self.callbacks.onAdd then
+		self.callbacks.onAdd(self)
+	end
+end
+
+function Object:_remove()
+	if self.callbacks.onRemove then
+		self.callbacks.onRemove(self)
+	end
+end
+
+function Object:update()
+	if self.parent and self.parent.width and self.parent.height then
+		local width = self.width
+		local height = self.height
+		local maxWidth = self.parent.width - self.parent.padding * 2
+		local maxHeight = self.parent.height - self.parent.padding * 2
+
+		if width == nil then
+			width = maxWidth
+		elseif width < 0 then
+			width = maxWidth + width
+		end
+
+		if height == nil then
+			height = maxHeight
+		elseif height < 0 then
+			height = maxHeight + height
+		end
+
+		self:resize(width, height)
 	end
 end
 

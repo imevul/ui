@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 
 --[[
 Class ModalWindow
@@ -10,6 +11,7 @@ local ModalWindow = ui.lib.class(ui.modules.Window, function(this, data)
 
 	this.type = 'ModalWindow'
 	this.drawOrder = 1/0 -- +Inf
+	this.absolute = true
 end)
 
 function ModalWindow:setVisible(visibility)

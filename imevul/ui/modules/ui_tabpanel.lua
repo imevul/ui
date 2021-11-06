@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 
 --[[
 Class TabPanel
@@ -14,33 +15,28 @@ local TabPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 
 	this.tabs = data.tabs or {_ = ui.modules.Panel({
 		width = this.width,
-		height = this.height - tabHeight,
-		border = false
 	})}
 
 	this.type = 'TabPanel'
-
-	local padding = 0
-	if this.border then
-		padding = 1
-	end
+	this.layout = ui.modules.ListLayout({ spacing = 0 })
 
 	this._tabButtons = {}
 	this._tabButtonContainer = ui.modules.Panel({
-		width = this.width - padding * 2,
+		padding = 0,
+		width = this.width,
 		height = tabHeight,
 		background = data.background or nil,
-		border = false
+		layout = ui.modules.ListLayout( { direction = ui.modules.Direction.HORIZONTAL, spacing = 0 })
 	})
-	this:add(this._tabButtonContainer, padding, padding)
+	this:add(this._tabButtonContainer)
 
 	local tabButtonXOffset = 0
-	local tabIndex = 1
-	for _, tabData in pairs(this.tabs) do
-		this._tabButtons[tabIndex] = ui.modules.TabButton({
+	for i, tabData in ipairs(this.tabs) do
+		this._tabButtons[i] = ui.modules.TabButton({
 			text = tabData.name,
 			padding = 1,
-			index = tabIndex,
+			index = i,
+			drawOrder = i,
 			background = this.tabColor,
 			callbacks = {
 				onClick = function(button)
@@ -49,16 +45,23 @@ local TabPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 			}
 		})
 
-		this._tabButtonContainer:add(this._tabButtons[tabIndex], tabButtonXOffset, 0)
-		tabButtonXOffset = tabButtonXOffset + this._tabButtons[tabIndex].width
-		tabIndex = tabIndex + 1
+		this._tabButtonContainer:add(this._tabButtons[i])
+		tabButtonXOffset = tabButtonXOffset + this._tabButtons[i].width
 	end
 
-	for _, tabData in pairs(this.tabs) do
-		tabData.tab:resize(this.width, this.height - tabHeight)
+	this._tabContainer = ui.modules.Panel({
+		width = this.width,
+		background = data.background or nil
+	})
+	this:add(this._tabContainer)
+
+	for _, tabData in ipairs(this.tabs) do
+		if this.width and this.height then
+			tabData.tab:resize(this.width, this.height - tabHeight)
+		end
 		tabData.tab:setVisible(false)
 
-		this:add(tabData.tab, 0, tabHeight)
+		this._tabContainer:add(tabData.tab)
 	end
 
 	this:switchTab(1)

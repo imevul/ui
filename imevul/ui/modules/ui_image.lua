@@ -1,5 +1,6 @@
 local args = { ... }
 local ui = args[1]
+assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
 --[[
@@ -14,8 +15,9 @@ local Image = ui.lib.class(ui.modules.Object, function(this, data)
 	this.image = nil
 
 	if this.source then
-		this.image = gfx.newImage(this.source)
-		assert(this.image)
+		if fs.exists(this.source) then
+			this.image = gfx.newImage(this.source)
+		end
 	else
 		if data.image and data.image.typeOf and data.image:typeOf('Drawable') then
 			this.image = data.image
