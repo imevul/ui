@@ -1,4 +1,4 @@
-## Imevul UI - A simple Lua GUI library built on top of Cobalt 2
+## Imevul UI - A simple Lua GUI library for ComputerCraft/CC:Tweaked built on top of Cobalt 2
 
 Please see the `examples` folder for some examples on how to use.
 
@@ -50,3 +50,7 @@ app:initialize()
 This above code will generate something that will look like this:
 
 ![img.png](img.png)
+
+The advanced example from the `examples` folder looks like this:
+
+![img2.png](img2.png)
