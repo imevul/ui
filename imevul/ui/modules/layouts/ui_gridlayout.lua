@@ -2,10 +2,9 @@ local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 
---[[
-Class GridLayout
-Automatically arranges elements in a grid
-]]--
+---@class GridLayout : Layout Automatically arranges elements in a grid
+---@field public columns number
+---@field public rows number
 local GridLayout = ui.lib.class(ui.modules.Layout, function(this, data)
 	ui.modules.Layout.init(this, data)
 
@@ -20,7 +19,7 @@ local GridLayout = ui.lib.class(ui.modules.Layout, function(this, data)
 	this.type = 'GridLayout'
 end)
 
-
+---@see Layout#update
 function GridLayout:update(objects, container)
 	ui.modules.Layout.update(self, objects)
 
@@ -44,6 +43,9 @@ function GridLayout:update(objects, container)
 	end
 end
 
+---Get the x,y position of grid element with index {index} out of {total} total number of elements
+---@param index number Index to get position for
+---@param total number Total number of elements
 function GridLayout:getPosition(index, total)
 	local numColumns, numRows
 	if self.columns > 0 then

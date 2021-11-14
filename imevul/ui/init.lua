@@ -12,18 +12,19 @@ local ui = {
 ui.lib.class = dofile(ui.config.path .. '/lib/class.lua')
 ui.lib.cobalt = dofile(ui.config.cobaltPath .. '/init.lua')
 
---[[
-Print debug information to stdout
-]]--
+---Print debug information to stdout
+---@public
+---@param text string
 ui.printDebug = function(text)
 	if ui.config.debug then
 		print(text)
 	end
 end
 
---[[
-Load a module and make it available globally
-]]--
+---Load a module and make it available globally
+---@public
+---@param module string the name of the module to load
+---@param subPath string Optional name of subfolder under the modules folder, if relevant
 ui.loadModule = function(module, subPath)
 	subPath = subPath or ''
 	if #subPath > 0 then

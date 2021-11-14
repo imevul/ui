@@ -3,16 +3,13 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class Input
-Basic input field. Automatically updates itself, and provides callbacks for ease of use.callbacks
-Callbacks include 'onSubmit', as well as 'onChang', 'onFocus', 'onBlur' from base class.
-]]--
+---@class Input : Text Basic input field. Automatically updates itself, and provides callbacks for ease of use. Callbacks include 'onSubmit', as well as 'onChang', 'onFocus', 'onBlur' from base class.
 local Input = ui.lib.class(ui.modules.Text, function(this, data)
 	ui.modules.Text.init(this, data)
 	this.type = 'Input'
 end)
 
+---@see Object#_draw
 function Input:_draw()
 	ui.modules.Text._draw(self)
 
@@ -41,6 +38,7 @@ function Input:_draw()
 	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
+---@see Object#_keyReleased
 function Input:_keyReleased(key, keyCode)
 	ui.modules.Text._keyReleased(self, key, keyCode)
 
@@ -57,6 +55,7 @@ function Input:_keyReleased(key, keyCode)
 	end
 end
 
+---@see Object#_textInput
 function Input:_textInput(char)
 	ui.modules.Text._textInput(self, char)
 

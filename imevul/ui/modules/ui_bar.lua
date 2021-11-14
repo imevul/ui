@@ -3,10 +3,14 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class Bar
-Basic "progress bar" style meter
-]]--
+---@class Bar : Object Basic "progress bar" style meter
+---@field public value number
+---@field public minValue number
+---@field public maxValue number
+---@field public color string
+---@field public gradient number Keep at 0 for no gradient, 1 for red->green, and -1 for green->red
+---@field public reverse boolean True to reverse fill direction
+---@field public direction number
 local Bar = ui.lib.class(ui.modules.Object, function(this, data)
 	ui.modules.Object.init(this, data)
 
@@ -31,6 +35,7 @@ local Bar = ui.lib.class(ui.modules.Object, function(this, data)
 	this.type = 'Bar'
 end)
 
+---@see Object#_draw
 function Bar:_draw()
 	local fillPercent = math.min(1.0, math.max(0.0, self.value * 1.0 / self.maxValue))
 
@@ -79,6 +84,10 @@ function Bar:_draw()
 	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
+---Set the value of the Bar
+---@public
+---@param value number The new value. It will be clamped to [minValue, maxValue]
+---@param noEvent boolean True to not trigger an onChange event
 function Bar:setValue(value, noEvent)
 	self.value = math.min(self.maxValue, math.max(self.minValue, value))
 
@@ -87,6 +96,9 @@ function Bar:setValue(value, noEvent)
 	end
 end
 
+---Set the maxValue of the Bar
+---@public
+---@param maxValue number The new maxValue. Also clamps the current Bar value between the new [minValue, maxValue]
 function Bar:setMaxValue(maxValue)
 	self.maxValue = math.max(self.minValue, maxValue)
 	self:setValue(self.value)

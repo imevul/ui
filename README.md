@@ -1,13 +1,19 @@
 ## Imevul UI - A simple Lua GUI library for ComputerCraft/CC:Tweaked built on top of Cobalt 2
 
-Please see the `examples` folder for some examples on how to use.
+Please see the `examples` folder for some examples on how to use. You can also [visit the Wiki](https://github.com/imevul/imevul-ui/wiki) to read the documentation.
 
 [Cobalt 2](https://github.com/ebernerd/cobalt-2) is not included, and needs to be downloaded separately!
 
 # Installation
 
-Download the entire repository and put it in the root directory as-is. You should then have a folder structure that looks like `/imevul/ui`.
+Simply run `pastebin run beC3s7jZ` to download and install Imevul UI.
+
+If you prefer, you can manually download the entire repository and put it in the root directory as-is. You should then have a folder structure that looks like `/imevul/ui`.
 Alternatively, you can choose your own location, but you will need to update the config if you decide to do so.
+
+# Updating
+Run the installer again to update to the newest version. If you use the default folder structure,
+it will automatically be removed and reinstalled.
 
 # How to use
 

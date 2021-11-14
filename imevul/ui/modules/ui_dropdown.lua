@@ -2,12 +2,9 @@ local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 
-
-
---[[
-Class DropDown
-Builds on top of the Button class. Shows a drop-down menu (List) when clicked
-]]--
+---@class DropDown : Button Builds on top of the Button class. Shows a drop-down menu (List) when clicked
+---@field public owner Container Object that should contain the menu
+---@field protected _menu List
 local DropDown = ui.lib.class(ui.modules.Button, function(this, data)
 	ui.modules.Button.init(this, data)
 
@@ -41,6 +38,8 @@ local DropDown = ui.lib.class(ui.modules.Button, function(this, data)
 	})
 end)
 
+---Show the DropDown menu
+---@public
 function DropDown:showMenu()
 	self:hideMenu()
 
@@ -58,12 +57,15 @@ function DropDown:showMenu()
 	end
 end
 
+---Hide the DropDown menu
+---@public
 function DropDown:hideMenu()
 	if self.owner then
 		self.owner:remove(self._menu)
 	end
 end
 
+---@see Button#click
 function DropDown:click()
 	ui.modules.Button.click(self)
 	self:showMenu()

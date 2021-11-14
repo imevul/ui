@@ -3,10 +3,7 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class ScrollPanel
-Container with a border and a title that can scroll components in and out of view
-]]--
+---@class ScrollPanel : Panel Container with a border and a title that can scroll components in and out of view
 local ScrollPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 	ui.modules.Panel.init(this, data)
 
@@ -24,6 +21,7 @@ local ScrollPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 	this.scrollDirection = data.scrollDirection or ui.modules.Direction.VERTICAL
 end)
 
+---@see Container#_drawObjects
 function ScrollPanel:_drawObjects()
 	gfx.currentCanvas.surface.overwrite = self.overwrite
 	for _, obj in pairs(self.objects) do
@@ -34,6 +32,7 @@ function ScrollPanel:_drawObjects()
 	end
 end
 
+---@see Object#_draw
 function ScrollPanel:_draw()
 	gfx.setBackgroundColor(self.background or self.config.theme.background or colors.black)
 	gfx.clear()
@@ -52,18 +51,22 @@ function ScrollPanel:_draw()
 	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
+---@see Object#_mousePressed
 function ScrollPanel:_mousePressed(x, y, button)
 	ui.modules.Panel._mousePressed(self, x + self.offsetX, y + self.offsetY, button)
 end
 
+---@see Object#_mouseReleased
 function ScrollPanel:_mouseReleased(x, y, button)
 	ui.modules.Panel._mouseReleased(self, x + self.offsetX, y + self.offsetY, button)
 end
 
+---@see Object#_mouseDrag
 function ScrollPanel:_mouseDrag(x, y, button)
 	ui.modules.Panel._mouseDrag(self, x + self.offsetX, y + self.offsetY, button)
 end
 
+---@see Object#_mouseScroll
 function ScrollPanel:_mouseScroll(x, y, direction)
 	ui.modules.Panel._mouseScroll(self, x + self.offsetY, y + self.offsetY, direction)
 
@@ -74,18 +77,22 @@ function ScrollPanel:_mouseScroll(x, y, direction)
 	end
 end
 
+---@see Panel#add
 function ScrollPanel:add(object, x, y)
 	ui.modules.Panel.add(self, object, x, y)
 
 	self:_updateSize()
 end
 
+---@see Panel#remove
 function ScrollPanel:remove(object)
 	ui.modules.Panel.remove(self, object)
 
 	self:_updateSize()
 end
 
+---Called when the ScrollPanel needs to resize if autoResize is enabled
+---@protected
 function ScrollPanel:_updateSize()
 	if self.autoResize and self.width and self.height then
 		local width = self.width
@@ -105,6 +112,9 @@ function ScrollPanel:_updateSize()
 	end
 end
 
+---Scroll the panel a certain amount in the X direction
+---@public
+---@param amount number The amount to scroll
 function ScrollPanel:scrollX(amount)
 	if not (self.width and self.maxWidth) then
 		return
@@ -116,6 +126,9 @@ function ScrollPanel:scrollX(amount)
 	end
 end
 
+---Scroll the panel a certain amount in the Y direction
+---@public
+---@param amount number The amount to scroll
 function ScrollPanel:scrollY(amount)
 	if not (self.height and self.maxHeight) then
 		return
@@ -127,6 +140,10 @@ function ScrollPanel:scrollY(amount)
 	end
 end
 
+---Scroll the panel to a specific x, y offset
+---@param x number X offset
+---@param y number Y offset
+---@param noEvent boolean True to not trigger an onScroll event
 function ScrollPanel:scrollTo(x, y, noEvent)
 	if not (self.width and self.maxWidth and self.height and self.maxHeight) then
 		return

@@ -3,10 +3,12 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class Container
-Can hold other objects. Handles drawing any children, and passing them relevant events.
-]]--
+---@class Container : Object Can hold other objects. Handles drawing any children, and passing them relevant events.
+---@field public layout Layout|nil
+---@field public objects table
+---@field public objectsReverse table
+---@field public overwrite boolean True to completely clear its own draw region
+---@field public padding number
 local Container = ui.lib.class(ui.modules.Object, function(this, data)
 	ui.modules.Object.init(this, data)
 
@@ -31,16 +33,15 @@ local Container = ui.lib.class(ui.modules.Object, function(this, data)
 	end
 end)
 
+---@see Object#_draw
 function Container:_draw()
 	ui.modules.Object._draw(self)
 
 	self:_drawObjects()
 end
 
---[[
-Draw any child objects to their own canvas, then this canvas.
-MUST be within own canvas renderTo context!
-]]--
+---Draw any child objects to their own canvas, then this canvas. MUST be within own canvas renderTo context!
+---@protected
 function Container:_drawObjects()
 	gfx.currentCanvas.surface.overwrite = self.overwrite
 	for _, obj in pairs(self.objects) do
@@ -51,6 +52,7 @@ function Container:_drawObjects()
 	end
 end
 
+---@see Object#_keyPressed
 function Container:_keyPressed(key, keyCode)
 	ui.modules.Object._keyReleased(self, key, keyCode)
 
@@ -62,6 +64,7 @@ function Container:_keyPressed(key, keyCode)
 	end
 end
 
+---@see Object#_keyReleased
 function Container:_keyReleased(key, keyCode)
 	ui.modules.Object._keyReleased(self, key, keyCode)
 
@@ -73,6 +76,7 @@ function Container:_keyReleased(key, keyCode)
 	end
 end
 
+---@see Object#_mousePressed
 function Container:_mousePressed(x, y, button)
 	ui.modules.Object._mousePressed(self, x, y, button)
 	local consumed = false
@@ -101,6 +105,7 @@ function Container:_mousePressed(x, y, button)
 	end
 end
 
+---@see Object#_mouseReleased
 function Container:_mouseReleased(x, y, button)
 	ui.modules.Object._mouseReleased(self, x, y, button)
 	local consumed = false
@@ -128,6 +133,7 @@ function Container:_mouseReleased(x, y, button)
 	end
 end
 
+---@see Object#_mouseDrag
 function Container:_mouseDrag(x, y, button)
 	ui.modules.Object._mouseDrag(self, x, y, button)
 	local consumed = false
@@ -155,6 +161,7 @@ function Container:_mouseDrag(x, y, button)
 	end
 end
 
+---@see Object#_mouseScroll
 function Container:_mouseScroll(x, y, direction)
 	ui.modules.Object._mouseScroll(self, x, y, direction)
 	local consumed = false
@@ -180,6 +187,7 @@ function Container:_mouseScroll(x, y, direction)
 	end
 end
 
+---@see Object#_textInput
 function Container:_textInput(char)
 	ui.modules.Object._textInput(self, char)
 
@@ -191,6 +199,7 @@ function Container:_textInput(char)
 	end
 end
 
+---@see Object#_blur
 function Container:_blur()
 	ui.modules.Object._blur(self)
 
@@ -199,6 +208,12 @@ function Container:_blur()
 	end
 end
 
+---Add an object as a child to this container
+---@public
+---@param object Object The object to add
+---@param x number X coordinate of the child object, relative to the parent
+---@param y number Y coordinate of the child object, relative to the parent
+---@return self
 function Container:add(object, x, y)
 	x = x or 0
 	y = y or 0
@@ -233,6 +248,9 @@ function Container:add(object, x, y)
 	return self
 end
 
+---Remove a child object from this container
+---@public
+---@param object Object Object to remove
 function Container:remove(object)
 	local index = 1
 	for _, obj in pairs(self.objects) do
@@ -247,6 +265,7 @@ function Container:remove(object)
 	end
 end
 
+---@see Object#update
 function Container:update(skipLayout)
 	ui.modules.Object.update(self)
 
@@ -262,6 +281,8 @@ function Container:update(skipLayout)
 	end
 end
 
+---Caches a local copy of all child objects in reverse draw order
+---@protected
 function Container:_copyReverse()
 	self.objectsReverse = {}
 	for k,v in pairs(self.objects) do
@@ -271,6 +292,10 @@ function Container:_copyReverse()
 	self:_sortComponents(self.objectsReverse, true)
 end
 
+---Sorts child objects based on their drawOrder
+---@protected
+---@param array table List of objects to sort
+---@param reverse boolean True to reverse the sort order
 function Container:_sortComponents(array, reverse)
 	reverse = reverse or false
 
@@ -294,6 +319,7 @@ function Container:_sortComponents(array, reverse)
 	end)
 end
 
+---@see Object#_inheritConfig
 function Container:_inheritConfig(config)
 	ui.modules.Object._inheritConfig(self, config)
 
@@ -302,6 +328,7 @@ function Container:_inheritConfig(config)
 	end
 end
 
+---@see Object#indexOf
 function Container:indexOf(child)
 	for i, obj in ipairs(self.objects) do
 		if obj.ref == child then
@@ -312,6 +339,7 @@ function Container:indexOf(child)
 	return nil
 end
 
+---@see Object#child
 function Container:child(index)
 	for i, obj in ipairs(self.objects) do
 		if i == index then
@@ -320,6 +348,7 @@ function Container:child(index)
 	end
 end
 
+---@see Object#childByName
 function Container:childByName(name, recursive)
 	for _, obj in pairs(self.objects) do
 		if obj.ref.name == name then
@@ -338,6 +367,7 @@ function Container:childByName(name, recursive)
 	end
 end
 
+---@see Object#getPositionOf
 function Container:getPositionOf(child)
 	for _, obj in pairs(self.objects) do
 		if obj.ref == child then

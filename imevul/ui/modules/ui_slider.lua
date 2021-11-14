@@ -3,10 +3,7 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class Slider
-Input control of a slider type
-]]--
+---@class Slider : Bar Input control of a slider type
 local Slider = ui.lib.class(ui.modules.Bar, function(this, data)
 	ui.modules.Bar.init(this, data)
 
@@ -18,6 +15,7 @@ end)
 Slider.STYLE_SLIDER = 'slider'
 Slider.STYLE_BAR = 'bar'
 
+---@see Object#_draw
 function Slider:_draw()
 	if self.style == Slider.STYLE_BAR then
 		ui.modules.Bar._draw(self)
@@ -53,6 +51,10 @@ function Slider:_draw()
 	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
+---Update the value based on a percentage from a point inside this object
+---@public
+---@param x number X coordinate
+---@param y number Y coordinate
 function Slider:setValueFromPoint(x, y)
 	local percent
 	if self.direction == ui.modules.Direction.HORIZONTAL then
@@ -68,6 +70,7 @@ function Slider:setValueFromPoint(x, y)
 	self:setValue(math.floor(percent * self.maxValue))
 end
 
+---@see Object#_keyPressed
 function Slider:_keyPressed(key, keyCode)
 	ui.modules.Bar._keyPressed(self, key, keyCode)
 	local rv = 1
@@ -90,6 +93,7 @@ function Slider:_keyPressed(key, keyCode)
 	end
 end
 
+---@see Object#_mousePressed
 function Slider:_mousePressed(x, y, button)
 	ui.modules.Bar._mousePressed(self, x, y, button)
 
@@ -98,6 +102,7 @@ function Slider:_mousePressed(x, y, button)
 	end
 end
 
+---@see Object#_mouseDrag
 function Slider:_mouseDrag(x, y, button)
 	ui.modules.Bar._mouseDrag(self, x, y, button)
 

@@ -3,10 +3,11 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class Checkbox
-Toggle on or off.
-]]--
+---@class Checkbox : Text Input element that can be toggled on or off.
+---@field public prefix string Prefix text
+---@field public prefixOn string prefix text when toggled on
+---@field public prefixOff string prefix text when toggled off
+---@field public value boolean
 local Checkbox = ui.lib.class(ui.modules.Text, function(this, data)
 	data = data or {}
 	this.prefix = '[ ]'
@@ -22,6 +23,7 @@ local Checkbox = ui.lib.class(ui.modules.Text, function(this, data)
 	this.type = 'Checkbox'
 end)
 
+---@see Text#setText
 function Checkbox:setText(newText)
 	if self.text == newText then
 		return
@@ -35,6 +37,7 @@ function Checkbox:setText(newText)
 	self:_resizeForText(newText)
 end
 
+---@see Object#_draw
 function Checkbox:_draw()
 	self:setText(self.text)
 
@@ -68,6 +71,7 @@ function Checkbox:_draw()
 	gfx.setBackgroundColor(colors.black or self.config.theme.background)
 end
 
+---Toggle the Checkbox on or off
 function Checkbox:toggle()
 	self.value = not self.value
 
@@ -76,6 +80,7 @@ function Checkbox:toggle()
 	end
 end
 
+---@see Object#_keyReleased
 function Checkbox:_keyReleased(key, keyCode)
 	ui.modules.Text._keyReleased(self, key, keyCode)
 	if key == 'space' then
@@ -83,6 +88,7 @@ function Checkbox:_keyReleased(key, keyCode)
 	end
 end
 
+---@see Object#_mouseReleased
 function Checkbox:_mouseReleased(x, y, button)
 	ui.modules.Text._mouseReleased(self, x, y, button)
 	self:toggle()

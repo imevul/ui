@@ -2,10 +2,10 @@ local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 
---[[
-Class List
-Container with a border and a title
-]]--
+---@class List : Panel Container with a border and a title
+---@field protected _list ScrollPanel
+---@field protected _slider Slider
+---@field public scrollbar boolean
 local List = ui.lib.class(ui.modules.Panel, function(this, data)
 	local items = data.items or {}
 	data.items = {}
@@ -75,6 +75,7 @@ local List = ui.lib.class(ui.modules.Panel, function(this, data)
 	this.type = 'List'
 end)
 
+---@see Object#update
 function List:update()
 	ui.modules.Panel.update(self)
 

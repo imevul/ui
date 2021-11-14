@@ -3,10 +3,7 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class App
-The main container for the application. Handles hooks into cobalt and rendering of the main app
-]]--
+---@class App : Container The main container for the application. Handles hooks into cobalt and rendering of the main app
 local App = ui.lib.class(ui.modules.Container, function(this, data)
 	data = data or {}
 	local termSize = {term.getSize()}
@@ -37,6 +34,7 @@ local App = ui.lib.class(ui.modules.Container, function(this, data)
 	this.callbacks = data.callbacks
 end)
 
+---@see Object#draw
 function App:_draw()
 	gfx.setBackgroundColor(colors.black)
 	gfx.clear()
@@ -44,6 +42,7 @@ function App:_draw()
 	ui.modules.Container._draw(self)
 end
 
+---@see Object#_render
 function App:_render()
 	gfx.setBackgroundColor(colors.black)--self.config.theme.background or colors.gray)
 	gfx.clear()
@@ -53,6 +52,8 @@ function App:_render()
 	gfx.draw(self.canvas)
 end
 
+---Initialize the app and start the main event loop
+---@public
 function App:initialize()
 	-- Cobalt hooks
 	local cobalt = ui.lib.cobalt
@@ -102,22 +103,27 @@ function App:initialize()
 	ui.lib.cobalt.init()
 end
 
+---Quit the app
+---@public
 function App:quit()
 	ui.lib.cobalt.application.quit()
 end
 
+---Called as part of the main event loop
 function App:_update(dt)
 	if self.callbacks.update then
 		self.callbacks.update(self, dt)
 	end
 end
 
+---Called when the app has finished loading
 function App:_load()
 	if self.callbacks.load then
 		self.callbacks.load(self)
 	end
 end
 
+---Called for any non-standard event
 function App:_eventHandler(event, a, b, c, d, e)
 	if self.callbacks[event] then
 		self.callbacks[event](self, a, b, c, d, e)

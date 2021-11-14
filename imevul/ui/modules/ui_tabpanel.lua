@@ -2,10 +2,13 @@ local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 
---[[
-Class TabPanel
-Container with an optional border and a title, and multiple pages controlled by tabs
-]]--
+---@class TabPanel : Panel Container with an optional border and a title, and multiple pages controlled by tabs
+---@field public tabColor string|nil
+---@field public tabs table
+---@field public layout Layout Layout used by the TabPanel. Not recommended to change this
+---@field protected _tabButtons
+---@field protected _tabButtonContainer
+---@field protected _tabContainer
 local TabPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 	ui.modules.Panel.init(this, data)
 
@@ -67,6 +70,9 @@ local TabPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 	this:switchTab(1)
 end)
 
+---Set a specific tab as active
+---@public
+---@param index number The index of the tab to switch to
 function TabPanel:switchTab(index)
 	for i, tabData in pairs(self.tabs) do
 		if i == index then

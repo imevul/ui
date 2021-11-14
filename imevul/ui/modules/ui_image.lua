@@ -3,10 +3,9 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class Image
-Draws an image (Cobalt 2 Drawable)
-]]--
+---@class Image : Object Draws an image (Cobalt 2 Drawable)
+---@field public source string
+---@field public image cobalt.Image|cobalt.Drawable
 local Image = ui.lib.class(ui.modules.Object, function(this, data)
 	ui.modules.Object.init(this, data)
 
@@ -31,6 +30,7 @@ local Image = ui.lib.class(ui.modules.Object, function(this, data)
 	this.type = 'Image'
 end)
 
+---@see Object#_draw
 function Image:_draw()
 	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 	gfx.clear()

@@ -3,11 +3,7 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class Text
-Text object for displaying a string. Can be changed later via setText()
-If the text is changed directly via .text field, the width will not be recalculated.
-]]--
+---@class Text : Object Text object for displaying a string. Can be changed later via setText(). If the text is changed directly via .text field, the width will not be recalculated.
 local Text = ui.lib.class(ui.modules.Object, function(this, data)
 	data = data or {}
 
@@ -41,6 +37,9 @@ local Text = ui.lib.class(ui.modules.Object, function(this, data)
 	this.type = 'Text'
 end)
 
+---Update the text value
+---@public
+---@param newText string New text value
 function Text:setText(newText)
 	if self.text == newText then
 		return
@@ -54,6 +53,9 @@ function Text:setText(newText)
 	end
 end
 
+---Resize the object based on the size of the new text value
+---@protected
+---@param newText string New text value
 function Text:_resizeForText(newText)
 	if not self.fixedWidth then
 		self.width = string.len(newText) + math.ceil(self.padding * 2)
@@ -61,6 +63,7 @@ function Text:_resizeForText(newText)
 	end
 end
 
+---@see Object#_draw
 function Text:_draw()
 	ui.modules.Object._draw(self)
 

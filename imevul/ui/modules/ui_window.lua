@@ -3,10 +3,7 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.cobalt.graphics
 
---[[
-Class Window
-Container with a border and a title
-]]--
+---@class Window : Container Container with a border and a title
 local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	ui.modules.Container.init(this, data)
 
@@ -32,6 +29,7 @@ local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	end
 end)
 
+---@see Object#_draw
 function Window:_draw()
 	gfx.setBackgroundColor(self.background or self.config.theme.background)
 	gfx.clear()
@@ -46,6 +44,8 @@ function Window:_draw()
 	ui.modules.Container._draw(self)
 end
 
+---Close the window. This will remove it from its parent if it has one, or simply set it as not visible otherwise
+---@public
 function Window:close()
 	if self.parent then
 		self.parent:remove(self)
