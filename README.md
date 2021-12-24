@@ -19,13 +19,13 @@ it will automatically be removed and reinstalled.
 
 The different modules are made available with a `UI_` prefix, for example `UI_App`.
 
-```
-local ui = dofile('/imevul/ui/init.lua')
+```Lua
+local _ = dofile('/imevul/ui/init.lua')
 
 -- Create the application itself
 local app = UI_App({
 	callbacks = {
-		keyReleased = function(app, key, keyCode)
+		keyReleased = function(app, key, _)
 			-- Make sure we can quit the application
 			if key == 'q' then
 				app:quit()
