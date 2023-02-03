@@ -3,7 +3,7 @@ local version = args[1] or '1.1.0'
 
 local installDir = ''
 local repoOwner = 'imevul'
-local repoName = 'imevul-ui'
+local repoName = 'ui'
 
 
 ---@class Installer
