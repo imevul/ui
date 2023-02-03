@@ -1,14 +1,10 @@
 local __SRC__ = debug.getinfo(1).short_src
-local __FILE__ = string.gsub(__SRC__, '^(.+/)', '')
-local __DIR__ = string.gsub(__SRC__, __FILE__ .. '$', '')
-if __DIR__ == '' then
-	__DIR__ = '/'
-end
+local __DIR__ = fs.getDir(__SRC__)
 
 local ui = {
 	config = {
-		path = __DIR__ .. 'imevul/ui',
-		cobaltPath = __DIR__ .. 'cobalt',
+		path = __DIR__,
+		cobaltPath = fs.combine(__DIR__, '../../cobalt'),
 		debug = false
 	},
 	lib = {},
