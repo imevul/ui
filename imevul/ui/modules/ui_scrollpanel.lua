@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class ScrollPanel : Panel Container with a border and a title that can scroll components in and out of view
 local ScrollPanel = ui.lib.class(ui.modules.Panel, function(this, data)
@@ -23,7 +23,7 @@ end)
 
 ---@see Container#_drawObjects
 function ScrollPanel:_drawObjects()
-	gfx.currentCanvas.surface.overwrite = self.overwrite
+	gfx.setOverwrite(self.overwrite)
 	for _, obj in pairs(self.objects) do
 		if obj.ref.visible and obj.ref.canvas then
 			obj.ref:_render()
@@ -40,7 +40,7 @@ function ScrollPanel:_draw()
 	if self.border then
 		gfx.setColor(self.color or self.config.theme.blurredBackground)
 		gfx.rect('line', 0, 0, self.width, self.height)
-		gfx.setColor(self.config.theme.focussedText)
+		gfx.setColor(self.config.theme.focusedText or colors.black)
 		gfx.setBackgroundColor(self.color or self.config.theme.blurredBackground)
 		gfx.print(self.title, math.floor((self.width - string.len(self.title)) / 2), 0)
 		gfx.setBackgroundColor(self.background or self.config.theme.background or colors.black)
@@ -68,7 +68,7 @@ end
 
 ---@see Object#_mouseScroll
 function ScrollPanel:_mouseScroll(x, y, direction)
-	ui.modules.Panel._mouseScroll(self, x + self.offsetY, y + self.offsetY, direction)
+	ui.modules.Panel._mouseScroll(self, x + self.offsetX, y + self.offsetY, direction)
 
 	if self.scrollDirection == ui.modules.Direction.VERTICAL then
 		self:scrollY(direction)

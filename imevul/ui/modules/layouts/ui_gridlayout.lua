@@ -51,7 +51,7 @@ function GridLayout:getPosition(index, total)
 	if self.columns > 0 then
 		numColumns = self.columns
 	else
-		numColumns = math.ceil((total - 1) / self.rows)
+		numColumns = math.ceil(total / self.rows)
 	end
 
 	if self.rows > 0 then
@@ -63,7 +63,7 @@ function GridLayout:getPosition(index, total)
 	local cellWidth = self.container.width / numColumns
 	local cellHeight = self.container.height / numRows
 	local column = (index - 1) % numColumns
-	local row = math.ceil((index - 1) / numColumns) - 1
+	local row = math.floor((index - 1) / numColumns)
 
 	local x = math.min(self.container.width - 1, math.max(0, column * cellWidth))
 	local y = math.min(self.container.height - 1, math.max(0, row * cellHeight))

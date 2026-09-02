@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class Checkbox : Text Input element that can be toggled on or off.
 ---@field public prefix string Prefix text
@@ -10,9 +10,9 @@ local gfx = ui.lib.cobalt.graphics
 ---@field public value boolean
 local Checkbox = ui.lib.class(ui.modules.Text, function(this, data)
 	data = data or {}
-	this.prefix = '[ ]'
-	this.prefixOn = '[X]'
-	this.prefixOff = '[ ]'
+	this.prefix = this.prefix or '[ ]'
+	this.prefixOn = this.prefixOn or '[X]'
+	this.prefixOff = this.prefixOff or '[ ]'
 	data.text = data.text or ''
 	data.text = this.prefix .. ' ' .. data.text
 	ui.modules.Text.init(this, data)
@@ -20,6 +20,7 @@ local Checkbox = ui.lib.class(ui.modules.Text, function(this, data)
 	data.value = data.value or false
 
 	this.value = data.value
+	this.focusable = true
 	this.type = 'Checkbox'
 end)
 
@@ -39,8 +40,6 @@ end
 
 ---@see Object#_draw
 function Checkbox:_draw()
-	self:setText(self.text)
-
 	ui.modules.Text._draw(self)
 
 	if self.focused then

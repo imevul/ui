@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class Container : Object Can hold other objects. Handles drawing any children, and passing them relevant events.
 ---@field public layout Layout|nil
@@ -17,7 +17,10 @@ local Container = ui.lib.class(ui.modules.Object, function(this, data)
 	this.objects = {}
 	this.objectsReverse = {}
 	this.type = 'Container'
-	this.overwrite = data.overwrite or true
+	this.overwrite = true
+	if data.overwrite ~= nil then
+		this.overwrite = data.overwrite
+	end
 	this.padding = data.padding or 1
 
 	if data.items then
@@ -43,8 +46,8 @@ end
 ---Draw any child objects to their own canvas, then this canvas. MUST be within own canvas renderTo context!
 ---@protected
 function Container:_drawObjects()
-	gfx.currentCanvas.surface.overwrite = self.overwrite
-	for _, obj in pairs(self.objects) do
+	gfx.setOverwrite(self.overwrite)
+	for _, obj in ipairs(self.objects) do
 		if obj.ref.visible and obj.ref.canvas then
 			obj.ref:_render()
 			gfx.draw(obj.ref.canvas, obj.x, obj.y)
@@ -54,9 +57,9 @@ end
 
 ---@see Object#_keyPressed
 function Container:_keyPressed(key, keyCode)
-	ui.modules.Object._keyReleased(self, key, keyCode)
+	ui.modules.Object._keyPressed(self, key, keyCode)
 
-	for _, obj in pairs(self.objectsReverse) do
+	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.focused then
 			obj.ref:_keyPressed(key, keyCode)
 			break
@@ -68,7 +71,7 @@ end
 function Container:_keyReleased(key, keyCode)
 	ui.modules.Object._keyReleased(self, key, keyCode)
 
-	for _, obj in pairs(self.objectsReverse) do
+	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.focused then
 			obj.ref:_keyReleased(key, keyCode)
 			break
@@ -81,20 +84,25 @@ function Container:_mousePressed(x, y, button)
 	ui.modules.Object._mousePressed(self, x, y, button)
 	local consumed = false
 
-	for _, obj in pairs(self.objectsReverse) do
+	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.visible then
 			local rx = x - obj.x
 			local ry = y - obj.y
 
-			if rx > 0 and ry > 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
-				obj.ref:_focus()
+			if rx >= 0 and ry >= 0 and rx < (obj.ref.width or 0) and ry < (obj.ref.height or 0) and not consumed then
+				if obj.ref.focusable then
+					local tlc = self:_findTopLevelComponent()
+					if tlc.setFocus then
+						tlc:setFocus(obj.ref)
+					else
+						obj.ref:_focus()
+					end
+				end
 				obj.ref:_mousePressed(rx, ry, button)
 
 				if obj.ref.opaque then
 					consumed = true
 				end
-			else
-				obj.ref:_blur()
 			end
 
 			-- Handle modal components
@@ -110,12 +118,12 @@ function Container:_mouseReleased(x, y, button)
 	ui.modules.Object._mouseReleased(self, x, y, button)
 	local consumed = false
 
-	for _, obj in pairs(self.objectsReverse) do
+	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.visible then
 			local rx = x - obj.x
 			local ry = y - obj.y
 
-			if rx > 0 and ry > 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
+			if rx >= 0 and ry >= 0 and rx < (obj.ref.width or 0) and ry < (obj.ref.height or 0) and not consumed then
 				if obj.ref.focused then
 					obj.ref:_mouseReleased(rx, ry, button)
 				end
@@ -138,12 +146,12 @@ function Container:_mouseDrag(x, y, button)
 	ui.modules.Object._mouseDrag(self, x, y, button)
 	local consumed = false
 
-	for _, obj in pairs(self.objectsReverse) do
+	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.visible then
 			local rx = x - obj.x
 			local ry = y - obj.y
 
-			if rx > 0 and ry > 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
+			if rx >= 0 and ry >= 0 and rx < (obj.ref.width or 0) and ry < (obj.ref.height or 0) and not consumed then
 				if obj.ref.focused then
 					obj.ref:_mouseDrag(rx, ry, button)
 				end
@@ -166,12 +174,12 @@ function Container:_mouseScroll(x, y, direction)
 	ui.modules.Object._mouseScroll(self, x, y, direction)
 	local consumed = false
 
-	for _, obj in pairs(self.objectsReverse) do
+	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.visible then
 			local rx = x - obj.x
 			local ry = y - obj.y
 
-			if rx > 0 and ry > 0 and rx <= obj.ref.width and ry <= obj.ref.height and not consumed then
+			if rx >= 0 and ry >= 0 and rx < (obj.ref.width or 0) and ry < (obj.ref.height or 0) and not consumed then
 				obj.ref:_mouseScroll(rx, ry, direction)
 
 				if obj.ref.opaque then
@@ -191,7 +199,7 @@ end
 function Container:_textInput(char)
 	ui.modules.Object._textInput(self, char)
 
-	for _, obj in pairs(self.objectsReverse) do
+	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.focused then
 			obj.ref:_textInput(char)
 			break
@@ -203,7 +211,7 @@ end
 function Container:_blur()
 	ui.modules.Object._blur(self)
 
-	for _, obj in pairs(self.objectsReverse) do
+	for _, obj in ipairs(self.objectsReverse) do
 		obj.ref:_blur()
 	end
 end
@@ -217,6 +225,8 @@ end
 function Container:add(object, x, y)
 	x = x or 0
 	y = y or 0
+	local reqX = x
+	local reqY = y
 
 	if x < 0 then
 		x = (self.width or 0) + x
@@ -229,11 +239,13 @@ function Container:add(object, x, y)
 	local obj = {
 		ref = object,
 		x = x,
-		y = y
+		y = y,
+		reqX = reqX,
+		reqY = reqY
 	}
 
-	for _, value in pairs(self.objects) do
-		if value == obj then
+	for _, value in ipairs(self.objects) do
+		if value.ref == object then
 			error('Object already added')
 			return
 		end
@@ -253,7 +265,7 @@ end
 ---@param object Object Object to remove
 function Container:remove(object)
 	local index = 1
-	for _, obj in pairs(self.objects) do
+	for _, obj in ipairs(self.objects) do
 		if obj.ref == object then
 			object.parent = nil
 			table.remove(self.objects, index)
@@ -269,7 +281,13 @@ end
 function Container:update(skipLayout)
 	ui.modules.Object.update(self)
 
-	for _, obj in pairs(self.objects) do
+	for _, obj in ipairs(self.objects) do
+		if obj.reqX and obj.reqX < 0 then
+			obj.x = (self.width or 0) + obj.reqX
+		end
+		if obj.reqY and obj.reqY < 0 then
+			obj.y = (self.height or 0) + obj.reqY
+		end
 		obj.ref:update()
 	end
 
@@ -285,8 +303,8 @@ end
 ---@protected
 function Container:_copyReverse()
 	self.objectsReverse = {}
-	for k,v in pairs(self.objects) do
-		self.objectsReverse[k] = v
+	for i, v in ipairs(self.objects) do
+		self.objectsReverse[i] = v
 	end
 
 	self:_sortComponents(self.objectsReverse, true)
@@ -301,7 +319,7 @@ function Container:_sortComponents(array, reverse)
 
 	-- Sort objects for drawing
 	table.sort(array, function (left, right)
-		if left.ref.drawOrder and right.ref.drawOrder then
+		if left.ref.drawOrder ~= nil and right.ref.drawOrder ~= nil then
 			if reverse then
 				return left.ref.drawOrder > right.ref.drawOrder
 			else
@@ -323,7 +341,7 @@ end
 function Container:_inheritConfig(config)
 	ui.modules.Object._inheritConfig(self, config)
 
-	for _, obj in pairs(self.objects) do
+	for _, obj in ipairs(self.objects) do
 		obj.ref:_inheritConfig(config)
 	end
 end
@@ -350,7 +368,7 @@ end
 
 ---@see Object#childByName
 function Container:childByName(name, recursive)
-	for _, obj in pairs(self.objects) do
+	for _, obj in ipairs(self.objects) do
 		if obj.ref.name == name then
 			return obj.ref
 		end
@@ -358,7 +376,7 @@ function Container:childByName(name, recursive)
 
 	if recursive then
 		local result
-		for _, obj in pairs(self.objects) do
+		for _, obj in ipairs(self.objects) do
 			result = obj.ref:childByName(name, recursive)
 			if result then
 				return result
@@ -367,15 +385,43 @@ function Container:childByName(name, recursive)
 	end
 end
 
+---Collect visible focusable descendants in document order
+---@public
+---@param out table|nil
+---@return table
+function Container:collectFocusable(out)
+	out = out or {}
+	for _, obj in ipairs(self.objects) do
+		local ref = obj.ref
+		if ref.visible then
+			if ref.focusable then
+				table.insert(out, ref)
+			end
+			if ref.collectFocusable then
+				ref:collectFocusable(out)
+			end
+		end
+	end
+	return out
+end
+
+---First visible focusable descendant, or nil
+---@public
+---@return Object|nil
+function Container:firstFocusable()
+	local list = self:collectFocusable({})
+	return list[1]
+end
+
 ---@see Object#getPositionOf
 function Container:getPositionOf(child)
-	for _, obj in pairs(self.objects) do
+	for _, obj in ipairs(self.objects) do
 		if obj.ref == child then
 			return obj.x, obj.y
 		end
 	end
 
-	return ui.modules.Object.gePositionOf(child)
+	return 0, 0
 end
 
 return Container

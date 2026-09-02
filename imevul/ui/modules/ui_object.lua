@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 local objectId = 0
 
 ---@class Object Base object that all other UI elements inherit from.
@@ -18,6 +18,7 @@ local objectId = 0
 ---@field public config table
 ---@field public callbacks table Any callbacks to register
 ---@field public focused boolean True when the object currently has focus
+---@field public focusable boolean True if Tab / click can give this object keyboard focus
 local Object = ui.lib.class(function(this, data)
 	data = data or {}
 	data.width = data.width or nil
@@ -30,18 +31,24 @@ local Object = ui.lib.class(function(this, data)
 	if data.opaque == nil then
 		data.opaque = true
 	end
+	if data.focusable == nil then
+		data.focusable = false
+	end
 
 	objectId = objectId + 1
 	this.id = objectId
 	this.name = data.name or nil
 	this.parent = nil
 	this.type = 'Object'
+	this.reqWidth = data.width
+	this.reqHeight = data.height
 	this.width = data.width
 	this.height = data.height
 	this.visible = data.visible
 	this.drawOrder = data.drawOrder or 0
 	this.absolute = data.absolute or false
 	this.opaque = data.opaque
+	this.focusable = data.focusable
 	this.config = data.config
 	this.callbacks = data.callbacks
 	this.focused = false
@@ -224,22 +231,25 @@ function Object:update()
 	if self.parent and self.parent.width and self.parent.height then
 		local width = self.width
 		local height = self.height
-		local maxWidth = self.parent.width - self.parent.padding * 2
-		local maxHeight = self.parent.height - self.parent.padding * 2
+		local padding = self.parent.padding or 0
+		local maxWidth = self.parent.width - padding * 2
+		local maxHeight = self.parent.height - padding * 2
 
-		if width == nil then
+		if self.reqWidth == nil then
 			width = maxWidth
-		elseif width < 0 then
-			width = maxWidth + width
+		elseif self.reqWidth < 0 then
+			width = maxWidth + self.reqWidth
 		end
 
-		if height == nil then
+		if self.reqHeight == nil then
 			height = maxHeight
-		elseif height < 0 then
-			height = maxHeight + height
+		elseif self.reqHeight < 0 then
+			height = maxHeight + self.reqHeight
 		end
 
-		self:resize(width, height)
+		if width ~= self.width or height ~= self.height then
+			self:resize(width, height)
+		end
 	end
 end
 

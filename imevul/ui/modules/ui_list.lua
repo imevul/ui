@@ -29,7 +29,7 @@ local List = ui.lib.class(ui.modules.Panel, function(this, data)
 		height = this.height,
 		background = data.background or nil,
 		layout = data.layout or ui.modules.ListLayout({container = this}),
-		scrollDirection = ui.modules.ScrollPanel.DIR_VERTICAL,
+		scrollDirection = ui.modules.Direction.VERTICAL,
 		callbacks = {
 			onScroll = function(_, _, offsetY, _, _)
 				if this._slider then

@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class Panel : Container Container with a border and a title
 ---@field public color string|nil
@@ -28,7 +28,7 @@ function Panel:_draw()
 	if self.border then
 		gfx.setColor(self.color or self.config.theme.blurredBackground)
 		gfx.rect('line', 0, 0, self.width, self.height)
-		gfx.setColor(self.config.theme.focussedText)
+		gfx.setColor(self.config.theme.focusedText or colors.black)
 		gfx.setBackgroundColor(self.color or self.config.theme.blurredBackground)
 		gfx.print(self.title, math.floor((self.width - string.len(self.title)) / 2), 0)
 		gfx.setBackgroundColor(self.background or self.config.theme.background or colors.black)

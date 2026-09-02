@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class Button : Text Builds on top of the Text class, but also draws an outline and provides an onClick event
 ---@field public color string Text color of the button
@@ -12,17 +12,30 @@ local Button = ui.lib.class(ui.modules.Text, function(this, data)
 	data = data or {}
 	this.color = data.color or nil
 	this.background = data.background or nil
+	this.default = data.default or false
+	this.focusable = true
 	this.type = 'Button'
 end)
 
 ---@see Object#_draw
 function Button:_draw()
-	gfx.setBackgroundColor(self.background or self.config.theme.primary or colors.cyan)
+	local bg
+	local fg
+	if self.focused then
+		bg = self.config.theme.focusedBackground or colors.white
+		fg = self.config.theme.focusedText or colors.black
+	else
+		bg = self.background or self.config.theme.primary or colors.cyan
+		fg = self.color or self.config.theme.text or colors.white
+	end
+	gfx.setBackgroundColor(bg)
 	gfx.clear()
-	gfx.setColor(self.background or self.config.theme.primary or colors.cyan)
+	gfx.setColor(bg)
 	gfx.rect('fill', 0, 0, self.width, self.height)
-	gfx.setColor(self.color or self.config.theme.text or colors.white)
+	local oldColor = self.color
+	self.color = fg
 	ui.modules.Text._draw(self)
+	self.color = oldColor
 	gfx.setColor(self.config.theme.text or colors.white)
 	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end

@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class ToggleButton : Checkbox Button that can be toggled on or off. Very similar to a Checkbox
 local ToggleButton = ui.lib.class(ui.modules.Checkbox, function(this, data)
@@ -9,20 +9,12 @@ local ToggleButton = ui.lib.class(ui.modules.Checkbox, function(this, data)
 	this.prefix    = '(     )'
 	this.prefixOn  = '( ON *)'
 	this.prefixOff = '(* OFF)'
-	data.text = data.text or ''
-	data.text = this.prefix .. ' ' .. data.text
-	ui.modules.Text.init(this, data)
-
-	data.value = data.value or false
-
-	this.value = data.value
+	ui.modules.Checkbox.init(this, data)
 	this.type = 'ToggleButton'
 end)
 
 ---@see Object#_draw
 function ToggleButton:_draw()
-	self:setText(self.text)
-
 	ui.modules.Text._draw(self)
 
 	if self.value then

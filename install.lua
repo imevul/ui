@@ -1,5 +1,5 @@
 local args = { ... }
-local version = args[1] or '1.1.0'
+local version = args[1] or 'master'
 
 local installDir = ''
 local repoOwner = 'imevul'
@@ -8,6 +8,26 @@ local repoName = 'ui'
 
 ---@class Installer
 local Installer = {}
+
+local function ensureDir(path)
+	local dir = fs.getDir(path)
+	if dir ~= '' and not fs.exists(dir) then
+		ensureDir(dir)
+		fs.makeDir(dir)
+	end
+end
+
+local function matchesFilter(path, filters)
+	if type(filters) ~= 'table' then
+		return true
+	end
+	for _, prefix in ipairs(filters) do
+		if path == prefix or path:sub(1, #prefix + 1) == prefix .. '/' then
+			return true
+		end
+	end
+	return false
+end
 
 ---Download a single file to a target folder
 ---@param url string URL of item to download
@@ -18,85 +38,45 @@ function Installer:downloadItem(url, target)
 		error(('Failed to download %s to %s'):format(url, target))
 	end
 
+	ensureDir(target)
 	local file = fs.open(target, 'w')
 	file.write(request.readAll())
 	file.close()
 	request.close()
 end
 
----Recursively download items into their correct target path
----@param items table Table containing items to download
----@param path string Target path to download them to
-function Installer:downloadItems(items, path)
-	for _, v in ipairs(items) do
-		if v.url == nil then
-			self:downloadItems(v.items, path .. '/' .. v.path)
-		else
-			print(('Downloading %s to %s'):format(v.path, path))
-			self:downloadItem(v.url, path .. '/' .. v.path)
-		end
-	end
-end
-
----Fetches downloadable items from a GitHub repository and then downloads them
+---List blobs under filters and download raw file contents
 ---@param owner string Name of the repository owner
 ---@param repo string Name of the repository
----@param sha string sha hash, or name of branch or tag
----@param filters table List of folders to download. All others will be skipped
-function Installer:downloadGitHubRepo(owner, repo, sha, filters)
-	local items = self:getGitHubTree(owner, repo, sha, filters)
-
-	self:downloadItems(items, installDir)
-end
-
----Recursively fetch a specific GitHub tree (files+folders)
----@param owner string Name of the repository owner
----@param repo string Name of the repository
----@param sha string sha hash, or name of branch or tag
----@param filters table A list of folders to download. All others will be skipped
-function Installer:getGitHubTree(owner, repo, sha, filters)
-	local url = ('https://api.github.com/repos/%s/%s/git/trees/%s'):format(owner, repo, sha)
+---@param ref string sha hash, or name of branch or tag
+---@param filters table List of path prefixes to download
+function Installer:downloadGitHubRepo(owner, repo, ref, filters)
+	local url = ('https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1'):format(owner, repo, ref)
 	local request = http.get(url, {
 		Accept = 'application/vnd.github.v3+json'
 	})
 	if request == nil then
-		error(('Could not reach GitHub API for %s/%s (%s). Either the version does not exist, or the API limit has been reached'):format(owner, repo, sha))
+		error(('Could not reach GitHub API for %s/%s (%s). Either the version does not exist, or the API limit has been reached'):format(owner, repo, ref))
 	end
 
-	local response = textutils.unserializeJSON(request.readAll())
+	local body = request.readAll()
+	request.close()
+	local response = textutils.unserializeJSON(body)
+	if not response or not response.tree then
+		error(('Invalid GitHub tree response for %s/%s (%s)'):format(owner, repo, ref))
+	end
+	if response.truncated then
+		error(('GitHub tree for %s/%s (%s) was truncated'):format(owner, repo, ref))
+	end
 
-	local items = {}
 	for _, v in ipairs(response.tree) do
-		local found = true
-		if type(filters) == 'table' then
-			found = false
-			for _, v2 in ipairs(filters) do
-				if v2 == v.path then
-					found = true
-					break
-				end
-			end
-		end
-
-		if found then
-			if v.type == 'tree' then
-				local subTree = self:getGitHubTree(owner, repo, v.sha)
-				table.insert(items, {
-					path = v.path,
-					url = nil,
-					items = subTree
-				})
-			elseif v.type == 'blob' then
-				table.insert(items, {
-					path = v.path,
-					url = v.url,
-					items = {}
-				})
-			end
+		if v.type == 'blob' and matchesFilter(v.path, filters) then
+			local rawUrl = ('https://raw.githubusercontent.com/%s/%s/%s/%s'):format(owner, repo, ref, v.path)
+			local target = installDir .. v.path
+			print(('Downloading %s'):format(v.path))
+			self:downloadItem(rawUrl, target)
 		end
 	end
-
-	return items
 end
 
 ---Installs the library to the default location

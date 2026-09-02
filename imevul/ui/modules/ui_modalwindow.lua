@@ -18,6 +18,10 @@ function ModalWindow:setVisible(visibility)
 	if self.visible then
 		local tlc = self:_findTopLevelComponent()
 		tlc:_blur()
+		local first = self:firstFocusable()
+		if first and tlc.setFocus then
+			tlc:setFocus(first)
+		end
 	end
 end
 

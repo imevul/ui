@@ -2,9 +2,9 @@ local __SRC__ = debug.getinfo(1).short_src
 local __DIR__ = fs.getDir(__SRC__)
 
 local ui = {
+	version = '1.3.0',
 	config = {
 		path = __DIR__,
-		cobaltPath = fs.combine(__DIR__, '../../cobalt'),
 		debug = false
 	},
 	lib = {},
@@ -13,7 +13,7 @@ local ui = {
 
 -- Load libraries
 ui.lib.class = dofile(ui.config.path .. '/lib/class.lua')
-ui.lib.cobalt = dofile(ui.config.cobaltPath .. '/init.lua')
+ui.lib.graphics = dofile(ui.config.path .. '/lib/graphics.lua')
 
 ---Print debug information to stdout
 ---@public
@@ -24,7 +24,7 @@ ui.printDebug = function(text)
 	end
 end
 
----Load a module and make it available globally
+---Load a module onto ui.modules and ui[name]
 ---@public
 ---@param module string the name of the module to load
 ---@param subPath string Optional name of subfolder under the modules folder, if relevant
@@ -41,34 +41,62 @@ ui.loadModule = function(module, subPath)
 	local mod = loadfile(path)
 	assert(mod, 'Module ' .. module .. ' could not be loaded (' .. path .. ')')
 	ui.modules[module] = mod(ui)
+	ui[module] = ui.modules[module]
 	return ui.modules[module]
 end
 
--- Make modules easily available
-UI_Direction	= ui.loadModule('Direction', 'enums')
+ui.loadModule('Direction', 'enums')
 
-UI_Layout		= ui.loadModule('Layout', 'layouts')
-UI_ListLayout	= ui.loadModule('ListLayout', 'layouts')
-UI_GridLayout	= ui.loadModule('GridLayout', 'layouts')
+ui.loadModule('Layout', 'layouts')
+ui.loadModule('ListLayout', 'layouts')
+ui.loadModule('GridLayout', 'layouts')
 
-UI_Object		= ui.loadModule('Object')
-UI_Container	= ui.loadModule('Container')
-UI_Window		= ui.loadModule('Window')
-UI_ModalWindow	= ui.loadModule('ModalWindow')
-UI_Panel		= ui.loadModule('Panel')
-UI_TabPanel		= ui.loadModule('TabPanel')
-UI_ScrollPanel	= ui.loadModule('ScrollPanel')
-UI_List			= ui.loadModule('List')
-UI_Text			= ui.loadModule('Text')
-UI_Image		= ui.loadModule('Image')
-UI_Input		= ui.loadModule('Input')
-UI_Checkbox		= ui.loadModule('Checkbox')
-UI_ToggleButton	= ui.loadModule('ToggleButton')
-UI_Button		= ui.loadModule('Button')
-UI_TabButton	= ui.loadModule('TabButton')
-UI_DropDown		= ui.loadModule('DropDown')
-UI_Bar			= ui.loadModule('Bar')
-UI_Slider		= ui.loadModule('Slider')
-UI_App			= ui.loadModule('App')
+ui.loadModule('Object')
+ui.loadModule('Container')
+ui.loadModule('Window')
+ui.loadModule('ModalWindow')
+ui.loadModule('Panel')
+ui.loadModule('TabPanel')
+ui.loadModule('ScrollPanel')
+ui.loadModule('List')
+ui.loadModule('Text')
+ui.loadModule('Image')
+ui.loadModule('Input')
+ui.loadModule('Checkbox')
+ui.loadModule('ToggleButton')
+ui.loadModule('Button')
+ui.loadModule('TabButton')
+ui.loadModule('DropDown')
+ui.loadModule('Bar')
+ui.loadModule('Slider')
+ui.loadModule('App')
+
+---Assign the old UI_* global names (UI_App, UI_Window, …)
+---@public
+function ui.exportGlobals()
+	UI_Direction = ui.Direction
+	UI_Layout = ui.Layout
+	UI_ListLayout = ui.ListLayout
+	UI_GridLayout = ui.GridLayout
+	UI_Object = ui.Object
+	UI_Container = ui.Container
+	UI_Window = ui.Window
+	UI_ModalWindow = ui.ModalWindow
+	UI_Panel = ui.Panel
+	UI_TabPanel = ui.TabPanel
+	UI_ScrollPanel = ui.ScrollPanel
+	UI_List = ui.List
+	UI_Text = ui.Text
+	UI_Image = ui.Image
+	UI_Input = ui.Input
+	UI_Checkbox = ui.Checkbox
+	UI_ToggleButton = ui.ToggleButton
+	UI_Button = ui.Button
+	UI_TabButton = ui.TabButton
+	UI_DropDown = ui.DropDown
+	UI_Bar = ui.Bar
+	UI_Slider = ui.Slider
+	UI_App = ui.App
+end
 
 return ui

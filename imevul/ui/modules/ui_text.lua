@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class Text : Object Text object for displaying a string. Can be changed later via setText(). If the text is changed directly via .text field, the width will not be recalculated.
 local Text = ui.lib.class(ui.modules.Object, function(this, data)

@@ -4,7 +4,7 @@ local ui = dofile('/imevul/ui/init.lua')
 local text
 
 -- Main application
-local app = UI_App({
+local app = ui.App({
 	config = {
 		theme = {
 			primary = colors.cyan,
@@ -29,40 +29,38 @@ local app = UI_App({
 	}
 })
 
--- Main window
-local win = UI_Window({
+-- Main window (fills the app; Tab / Shift-Tab move focus, Enter activates the default button)
+local win = ui.Window({
 	title = 'Window Title',
-	width = app.width,
-	height = app.height,
 	background = colors.black
 })
 app:add(win)
 
 -- Quit button
-win:add(UI_Button({
+win:add(ui.Button({
 	text = 'X',
 	color = colors.red,
 	callbacks = {
-		mouseReleased = function()
+		onClick = function()
 			app:quit()
 		end
 	}
-}), win.width - 1, 0)
+}), -1, 0)
 
 -- Use previous ref
-text = UI_Text({
+text = ui.Text({
 	text = 'Text: Press q to quit'
 })
 win:add(text, 2, 2)
 
 -- Add another line of text
-local text2 = UI_Text({
+local text2 = ui.Text({
 	text = 'This text will change later'
 })
 win:add(text2, 2, 3)
 
 -- Add an input field
-local input = UI_Input({
+local input = ui.Input({
 	text = 'Input field',
 	width = 20
 })
@@ -71,20 +69,21 @@ win:add(input, 2, 4)
 -- Add a button
 local bar
 local cnt = 0
-win:add(UI_Button({
+win:add(ui.Button({
 	text = 'This is a Button',
 	padding = 1,
+	default = true,
 	callbacks = {
-		mouseReleased = function ()
+		onClick = function ()
 			cnt = cnt + 1
 			text2:setText('The Button has been clicked ' ..  cnt .. ' times')
-			bar.value = cnt
+			bar:setValue(cnt)
 		end
 	}
 }), 5, 6)
 
 -- Add a progress bar that tracks how many times we clicked the button
-bar = UI_Bar({
+bar = ui.Bar({
 	width = 30
 })
 win:add(bar, 2, 10)

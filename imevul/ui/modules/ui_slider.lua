@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class Slider : Bar Input control of a slider type
 local Slider = ui.lib.class(ui.modules.Bar, function(this, data)
@@ -9,6 +9,7 @@ local Slider = ui.lib.class(ui.modules.Bar, function(this, data)
 
 	this.step = data.step or 1
 	this.style = data.style or ui.modules.Slider.STYLE_SLIDER
+	this.focusable = true
 	this.type = 'Slider'
 end)
 

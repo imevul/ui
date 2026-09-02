@@ -1,12 +1,14 @@
-## Imevul UI - A simple Lua GUI library for ComputerCraft/CC:Tweaked built on top of Cobalt 2
+## Imevul UI - A simple Lua GUI library for ComputerCraft/CC:Tweaked
 
 Please see the `examples` folder for some examples on how to use. You can also [visit the Wiki](https://github.com/imevul/imevul-ui/wiki) to read the documentation.
 
-[Cobalt 2](https://github.com/ebernerd/cobalt-2) is not included, and needs to be downloaded separately!
+Agent notes and the phase plan live in [`AGENTS.md`](AGENTS.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md). For CraftOS-PC (`make run` / `make smoke`), see [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 # Installation
 
 Simply run `pastebin run beC3s7jZ` to download and install Imevul UI.
+
+The pastebin (`beC3s7jZ`) is a copy of [`pb_installer.lua`](pb_installer.lua) and is not stored in this repository. After installer changes land, that pastebin must be re-uploaded so `pastebin run` still fetches the current bootstrap.
 
 If you prefer, you can manually download the entire repository and put it in the root directory as-is. You should then have a folder structure that looks like `/imevul/ui`.
 Alternatively, you can choose your own location, but you will need to update the config if you decide to do so.
@@ -17,13 +19,13 @@ it will automatically be removed and reinstalled.
 
 # How to use
 
-The different modules are made available with a `UI_` prefix, for example `UI_App`.
+Constructors live on the returned table (`ui.App`, `ui.Window`, …). Call `ui.exportGlobals()` if you still want the old `UI_*` names. Tab / Shift-Tab move focus, Enter clicks a `default = true` Button, and Escape closes a closable window or hides a modal.
 
 ```Lua
-local _ = dofile('/imevul/ui/init.lua')
+local ui = dofile('/imevul/ui/init.lua')
 
 -- Create the application itself
-local app = UI_App({
+local app = ui.App({
 	callbacks = {
 		keyReleased = function(app, key, _)
 			-- Make sure we can quit the application
@@ -34,18 +36,16 @@ local app = UI_App({
 	}
 })
 
--- Create a window
-local win = UI_Window({
-	title = 'My window',
-	width = app.width,
-	height = app.height
+-- Create a window (omit width/height to fill the app)
+local win = ui.Window({
+	title = 'My window'
 })
 
 -- Add the window as a child to the app
 app:add(win)
 
 -- Create and add a text object as a child to the window
-win:add(UI_Text({
+win:add(ui.Text({
 	text = 'My text'
 }), 2, 2)
 

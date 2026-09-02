@@ -1,7 +1,7 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
 ---@class Window : Container Container with a border and a title
 local Window = ui.lib.class(ui.modules.Container, function(this, data)
@@ -14,9 +14,10 @@ local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	this.background = data.background or nil
 	this.type = 'Window'
 	this.padding = data.padding or 2
+	this.closable = data.closeButton and true or false
 
 	if data.closeButton then
-		this:add(UI_Button({
+		this:add(ui.modules.Button({
 			text = 'X',
 			background = colors.red,
 			absolute = true,

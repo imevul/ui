@@ -1,7 +1,7 @@
 local ui = dofile('/imevul/ui/init.lua')
 
 -- Create the application itself
-local app = UI_App({
+local app = ui.App({
 	callbacks = {
 		keyReleased = function(app, key, keyCode)
 			-- Make sure we can quit the application
@@ -12,18 +12,16 @@ local app = UI_App({
 	}
 })
 
--- Create a window
-local win = UI_Window({
-	title = 'My window',
-	width = app.width,
-	height = app.height
+-- Create a window (omit width/height to fill the app; Tab / Shift-Tab move focus)
+local win = ui.Window({
+	title = 'My window'
 })
 
 -- Add the window as a child to the app
 app:add(win)
 
 -- Create and add a text object as a child to the window
-win:add(UI_Text({
+win:add(ui.Text({
 	text = 'My text'
 }), 2, 2)
 

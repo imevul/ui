@@ -1,11 +1,11 @@
 local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
-local gfx = ui.lib.cobalt.graphics
+local gfx = ui.lib.graphics
 
----@class Image : Object Draws an image (Cobalt 2 Drawable)
+---@class Image : Object Draws an image (nfp / paintutils Drawable)
 ---@field public source string
----@field public image cobalt.Image|cobalt.Drawable
+---@field public image table|nil
 local Image = ui.lib.class(ui.modules.Object, function(this, data)
 	ui.modules.Object.init(this, data)
 
