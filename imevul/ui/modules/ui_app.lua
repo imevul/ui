@@ -3,7 +3,9 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.graphics
 
----@class App : Container The main container for the application. Owns the event loop and presents the screen.
+---@class App : Container Top-level container. Owns os.pullEvent, presents the screen, and dispatches callbacks.
+---App callbacks: load, update(dt), keyPressed, keyReleased, mousePressed, mouseReleased, mouseDrag, mouseScroll, textInput.
+---Other event names (term_resize, rednet_message, …) are forwarded through _eventHandler as callbacks[event].
 local App = ui.lib.class(ui.modules.Container, function(this, data)
 	data = data or {}
 	local termSize = {term.getSize()}
@@ -141,7 +143,7 @@ function App:resize(width, height)
 	self:update()
 end
 
----Blur the tree and focus the ancestor chain down to target
+---Blur the tree and focus the ancestor chain down to target. Nil target clears focus.
 ---@public
 ---@param target Object|nil
 function App:setFocus(target)
@@ -245,6 +247,7 @@ function App:_focusTargetAt(x, y)
 	return nil
 end
 
+---Click empty space or chrome to clear focus; clicks outside a modal leave its focus alone
 ---@see Object#_mousePressed
 function App:_mousePressed(x, y, button)
 	local target = self:_focusTargetAt(x, y)
@@ -323,6 +326,7 @@ function App:_findDefaultButton()
 	return findDefault(window or self)
 end
 
+---Tab / Shift-Tab move the focus ring
 ---@see Object#_keyPressed
 function App:_keyPressed(key, keyCode)
 	if key == 'leftShift' or key == 'rightShift' then
@@ -339,6 +343,7 @@ function App:_keyPressed(key, keyCode)
 	ui.modules.Container._keyPressed(self, key, keyCode)
 end
 
+---Escape hides a modal or closes a closable window; Enter clicks the default Button
 ---@see Object#_keyReleased
 function App:_keyReleased(key, keyCode)
 	if key == 'leftShift' or key == 'rightShift' then
@@ -479,7 +484,7 @@ function App:_load()
 	end
 end
 
----Called for any non-standard event
+---Forward unmatched events (term_resize, rednet_message, …) to callbacks[event]
 function App:_eventHandler(event, a, b, c, d, e)
 	if self.callbacks[event] then
 		self.callbacks[event](self, a, b, c, d, e)

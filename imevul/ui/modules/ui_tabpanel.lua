@@ -6,9 +6,9 @@ assert(ui, 'Imevul UI library not found')
 ---@field public tabColor string|nil
 ---@field public tabs table
 ---@field public layout Layout Layout used by the TabPanel. Not recommended to change this
----@field protected _tabButtons
----@field protected _tabButtonContainer
----@field protected _tabContainer
+---@field protected _tabButtons table
+---@field protected _tabButtonContainer Container
+---@field protected _tabContainer Container
 local TabPanel = ui.lib.class(ui.modules.Panel, function(this, data)
 	ui.modules.Panel.init(this, data)
 

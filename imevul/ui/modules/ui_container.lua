@@ -16,8 +16,9 @@ end
 
 ---@class Container : Object Can hold other objects. Handles drawing any children, and passing them relevant events.
 ---@field public layout Layout|nil
----@field public objects table
----@field public objectsReverse table
+---@field public objects table Document-order children used for layout and focus
+---@field public objectsDraw table Children sorted for paint (drawOrder, then id)
+---@field public objectsReverse table Children sorted for hit-test (highest drawOrder first)
 ---@field public overwrite boolean True to completely clear its own draw region
 ---@field public padding number
 local Container = ui.lib.class(ui.modules.Object, function(this, data)

@@ -91,6 +91,6 @@ Library defects only. Installer and globals are P3.
 | F-2 | `term_resize` reflow (fill children + layouts) | [X] |
 | F-3 | Input caret, overflow scroll, max length, left/right movement, click-to-caret | [X] |
 | F-4 | More widgets (radio group, number field, tooltip, dialog helper) | [X] |
-| F-5 | Wiki / in-source annotation refresh (typos, List, Events) | [ ] |
+| F-5 | Wiki / in-source annotation refresh (typos, List, Events) | [X] |
 | F-6 | Optional GitHub Actions via `craftos-pc-action` | [ ] |
 | F-7 | Monitor / peripheral attach (redirect, detach fallback, `monitor_touch`) | [ ] |

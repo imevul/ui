@@ -5,8 +5,8 @@ local gfx = ui.lib.graphics
 
 ---@class Checkbox : Text Input element that can be toggled on or off.
 ---@field public prefix string Prefix text
----@field public prefixOn string prefix text when toggled on
----@field public prefixOff string prefix text when toggled off
+---@field public prefixOn string Prefix text when toggled on
+---@field public prefixOff string Prefix text when toggled off
 ---@field public value boolean
 local Checkbox = ui.lib.class(ui.modules.Text, function(this, data)
 	data = data or {}

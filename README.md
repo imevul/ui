@@ -1,6 +1,6 @@
 ## Imevul UI - A simple Lua GUI library for ComputerCraft/CC:Tweaked
 
-Please see the `examples` folder for some examples on how to use (`example-widgets.lua` covers Radio, NumberField, tooltips, and dialogs). You can also [visit the Wiki](https://github.com/imevul/imevul-ui/wiki) to read the documentation.
+Please see the `examples` folder for some examples on how to use (`example-widgets.lua` covers Radio, NumberField, tooltips, and dialogs). You can also [visit the Wiki](https://github.com/imevul/ui/wiki) to read the documentation.
 
 Agent notes and the phase plan live in [`AGENTS.md`](AGENTS.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md). For CraftOS-PC (`make run` / `make smoke`), see [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 

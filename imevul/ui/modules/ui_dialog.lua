@@ -2,6 +2,7 @@ local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 
+---@class Dialog Callable helper that opens a ModalWindow. Also Dialog.alert / Dialog.confirm.
 local Dialog = {}
 
 ---@param app App

@@ -16,9 +16,10 @@ local objectId = 0
 ---@field public absolute boolean True to skip layout rules
 ---@field public opaque boolean True to block events from passing to objects below
 ---@field public config table
----@field public callbacks table Any callbacks to register
+---@field public callbacks table Constructor callbacks: onFocus, onBlur, onAdd, onRemove, onResize, onSetVisible, plus forwarded keyPressed, keyReleased, mousePressed, mouseReleased, mouseDrag, mouseScroll, textInput
 ---@field public focused boolean True when the object currently has focus
 ---@field public focusable boolean True if Tab / click can give this object keyboard focus
+---@field public tooltip string|nil Hint shown on focus or hover via App:showTooltip
 local Object = ui.lib.class(function(this, data)
 	data = data or {}
 	data.width = data.width or nil

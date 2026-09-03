@@ -2,8 +2,8 @@ local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 
----@class ListLayout : Layout Automatically arranges elements vertically
----@field direction number
+---@class ListLayout : Layout Arranges children in a line (vertical or horizontal)
+---@field direction number Direction.VERTICAL (default) or Direction.HORIZONTAL
 local ListLayout = ui.lib.class(ui.modules.Layout, function(this, data)
 	ui.modules.Layout.init(this, data)
 

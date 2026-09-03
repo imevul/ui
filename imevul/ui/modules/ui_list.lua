@@ -2,7 +2,7 @@ local args = { ... }
 local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 
----@class List : Panel Container with a border and a title
+---@class List : Panel Scrollable item list. Children live on an inner ScrollPanel; an optional Slider is the scrollbar.
 ---@field protected _list ScrollPanel
 ---@field protected _slider Slider
 ---@field public scrollbar boolean
