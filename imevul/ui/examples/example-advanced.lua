@@ -54,7 +54,7 @@ win = ui.Window({
 		items = {
 			ui.List({
 				name = 'sidebar',
-				width = app.width * 0.2,
+				width = math.floor(app.width * 0.2),
 				background = colors.gray,
 				items = {
 					ui.Text({text = 'Foo'}),
@@ -67,7 +67,7 @@ win = ui.Window({
 			}),
 
 			ui.Panel({
-				width = app.width * 0.8,
+				width = math.floor(app.width * 0.8),
 				layout = ui.ListLayout({ spacing = 1}),
 				padding = 1,
 				items = {

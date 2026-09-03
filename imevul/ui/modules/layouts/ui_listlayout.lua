@@ -29,15 +29,15 @@ function ListLayout:update(objects, container)
 			y = self.container.padding
 		end
 
-		for _, obj in pairs(objects) do
+		for _, obj in ipairs(objects) do
 			if not obj.ref.absolute then
-				obj.x = x
-				obj.y = y
+				obj.x = math.floor(x)
+				obj.y = math.floor(y)
 
 				if self.direction == ui.modules.Direction.VERTICAL then
-					y = y + (obj.ref.height or 1) + self.spacing
+					y = y + math.floor(obj.ref.height or 1) + self.spacing
 				else
-					x = x + (obj.ref.width or 1) + self.spacing
+					x = x + math.floor(obj.ref.width or 1) + self.spacing
 				end
 			end
 		end

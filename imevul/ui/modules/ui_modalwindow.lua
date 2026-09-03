@@ -7,7 +7,7 @@ local ModalWindow = ui.lib.class(ui.modules.Window, function(this, data)
 	ui.modules.Window.init(this, data)
 
 	this.type = 'ModalWindow'
-	this.drawOrder = 1/0 -- +Inf
+	this.drawOrder = 1000000
 	this.absolute = true
 end)
 

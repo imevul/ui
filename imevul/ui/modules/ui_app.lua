@@ -28,6 +28,9 @@ local App = ui.lib.class(ui.modules.Container, function(this, data)
 	end
 
 	data.callbacks = data.callbacks or {}
+	if data.padding == nil then
+		data.padding = 0
+	end
 
 	ui.modules.Container.init(this, data)
 
@@ -38,7 +41,99 @@ local App = ui.lib.class(ui.modules.Container, function(this, data)
 	this.config = data.config
 	this.callbacks = data.callbacks
 	this._shiftHeld = false
+	this._hoverTarget = nil
+	this._hoverSince = 0
+	this._tooltipOwner = nil
+	this._tooltipBubble = nil
+	this._tooltipSource = nil
 end)
+
+---Show the single app tooltip bubble under owner
+---@public
+---@param owner Object
+---@param text string|nil
+---@param source string|nil
+function App:showTooltip(owner, text, source)
+	self:hideTooltip()
+	text = text or (owner and owner.tooltip) or ''
+	if not owner or text == '' then
+		return
+	end
+
+	local label = ui.modules.Text({
+		text = text,
+		color = self.config.theme.focusedText or colors.black
+	})
+	local width = math.min((#text) + 2, self.width or (#text + 2))
+	local bubble = ui.modules.Panel({
+		width = width,
+		height = 1,
+		padding = 0,
+		background = self.config.theme.focusedBackground or colors.white,
+		absolute = true,
+		drawOrder = 100000,
+		items = { label }
+	})
+
+	local ox, oy = 0, 0
+	if owner.getPositionIn and owner ~= self then
+		ox, oy = owner:getPositionIn(self)
+	end
+	local px = ox
+	local py = oy + (owner.height or 1)
+	if px + width > (self.width or width) then
+		px = (self.width or width) - width
+	end
+	if py + 1 > (self.height or 1) then
+		py = oy - 1
+	end
+	if px < 0 then
+		px = 0
+	end
+	if py < 0 then
+		py = 0
+	end
+
+	self._tooltipOwner = owner
+	self._tooltipSource = source or 'focus'
+	self._tooltipBubble = bubble
+	self:add(bubble, px, py)
+end
+
+---Remove the tooltip bubble if present
+---@public
+function App:hideTooltip()
+	if self._tooltipBubble then
+		if self._tooltipBubble.parent then
+			self:remove(self._tooltipBubble)
+		end
+		self._tooltipBubble = nil
+		self._tooltipOwner = nil
+		self._tooltipSource = nil
+	end
+end
+
+function App:_tooltipAt(x, y)
+	if not self.hitTest then
+		return nil
+	end
+	local hit = self:hitTest(x, y)
+	if hit and hit.tooltip and hit.tooltip ~= '' then
+		return hit
+	end
+	return nil
+end
+
+function App:_mouseMove(x, y)
+	local target = self:_tooltipAt(x, y)
+	if target ~= self._hoverTarget then
+		self._hoverTarget = target
+		self._hoverSince = os.clock()
+		if not target and self._tooltipSource == 'hover' then
+			self:hideTooltip()
+		end
+	end
+end
 
 ---@see Object#resize
 function App:resize(width, height)
@@ -120,6 +215,43 @@ end
 ---@return Object
 function App:_focusRoot()
 	return self:_findTopModal() or self
+end
+
+---Widget under the click for focus, or false if a modal ate an outside click
+---@protected
+---@param x number
+---@param y number
+---@return Object|nil|boolean
+function App:_focusTargetAt(x, y)
+	local modal = self:_findTopModal()
+	if modal then
+		local mx, my = 0, 0
+		if modal.getPositionIn and modal ~= self then
+			mx, my = modal:getPositionIn(self)
+		end
+		local mw = modal.width or 0
+		local mh = modal.height or 0
+		if x < mx or y < my or x >= mx + mw or y >= my + mh then
+			return false
+		end
+		if modal.hitTest then
+			return modal:hitTest(x - mx, y - my) or modal
+		end
+		return modal
+	end
+	if self.hitTest then
+		return self:hitTest(x, y)
+	end
+	return nil
+end
+
+---@see Object#_mousePressed
+function App:_mousePressed(x, y, button)
+	local target = self:_focusTargetAt(x, y)
+	if target ~= false and (not target or not target.focusable) then
+		self:setFocus(nil)
+	end
+	ui.modules.Container._mousePressed(self, x, y, button)
 end
 
 ---Move keyboard focus to the next focusable widget
@@ -230,7 +362,7 @@ function App:_keyReleased(key, keyCode)
 	end
 	if key == 'enter' then
 		local leaf = self:getFocusedLeaf()
-		if not leaf or leaf.type ~= 'Input' then
+		if not leaf or (leaf.type ~= 'Input' and leaf.type ~= 'NumberField') then
 			local btn = self:_findDefaultButton()
 			if btn then
 				btn:click()
@@ -245,6 +377,9 @@ end
 function App:_draw()
 	gfx.setBackgroundColor((self.config.theme and self.config.theme.background) or colors.black)
 	gfx.clear()
+	if self.canvas then
+		self.canvas.overwrite = true
+	end
 
 	ui.modules.Container._draw(self)
 end
@@ -294,6 +429,12 @@ function App:initialize()
 			self:_mouseDrag(b - 1, c - 1, a)
 		elseif event == 'mouse_scroll' then
 			self:_mouseScroll(b - 1, c - 1, a)
+		elseif event == 'mouse_move' then
+			if c ~= nil then
+				self:_mouseMove(b - 1, c - 1)
+			else
+				self:_mouseMove((a or 1) - 1, (b or 1) - 1)
+			end
 		elseif event == 'term_resize' then
 			local tw, th = term.getSize()
 			self:resize(tw, th)
@@ -319,6 +460,13 @@ end
 ---Called as part of the main event loop
 function App:_update(dt)
 	ui.modules.Container.update(self)
+	if self._hoverTarget and self._hoverTarget.tooltip and self._hoverTarget.tooltip ~= '' then
+		if (os.clock() - (self._hoverSince or 0)) >= 0.4 then
+			if self._tooltipOwner ~= self._hoverTarget then
+				self:showTooltip(self._hoverTarget, nil, 'hover')
+			end
+		end
+	end
 	if self.callbacks.update then
 		self.callbacks.update(self, dt)
 	end

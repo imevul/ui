@@ -49,6 +49,7 @@ local Object = ui.lib.class(function(this, data)
 	this.absolute = data.absolute or false
 	this.opaque = data.opaque
 	this.focusable = data.focusable
+	this.tooltip = data.tooltip
 	this.config = data.config
 	this.callbacks = data.callbacks
 	this.focused = false
@@ -198,6 +199,13 @@ function Object:_focus()
 		if self.callbacks.onFocus then
 			self.callbacks.onFocus(self)
 		end
+
+		if self.tooltip and self.tooltip ~= '' then
+			local tlc = self:_findTopLevelComponent()
+			if tlc.showTooltip then
+				tlc:showTooltip(self)
+			end
+		end
 	end
 end
 
@@ -208,6 +216,11 @@ function Object:_blur()
 
 		if self.callbacks.onBlur then
 			self.callbacks.onBlur(self)
+		end
+
+		local tlc = self:_findTopLevelComponent()
+		if tlc.hideTooltip and tlc._tooltipOwner == self then
+			tlc:hideTooltip()
 		end
 	end
 end

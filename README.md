@@ -1,6 +1,6 @@
 ## Imevul UI - A simple Lua GUI library for ComputerCraft/CC:Tweaked
 
-Please see the `examples` folder for some examples on how to use. You can also [visit the Wiki](https://github.com/imevul/imevul-ui/wiki) to read the documentation.
+Please see the `examples` folder for some examples on how to use (`example-widgets.lua` covers Radio, NumberField, tooltips, and dialogs). You can also [visit the Wiki](https://github.com/imevul/imevul-ui/wiki) to read the documentation.
 
 Agent notes and the phase plan live in [`AGENTS.md`](AGENTS.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md). For CraftOS-PC (`make run` / `make smoke`), see [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
@@ -19,7 +19,7 @@ it will automatically be removed and reinstalled.
 
 # How to use
 
-Constructors live on the returned table (`ui.App`, `ui.Window`, …). Call `ui.exportGlobals()` if you still want the old `UI_*` names. Tab / Shift-Tab move focus, Enter clicks a `default = true` Button, and Escape closes a closable window or hides a modal.
+Constructors live on the returned table (`ui.App`, `ui.Window`, …). Call `ui.exportGlobals()` if you still want the old `UI_*` names. Tab / Shift-Tab move focus, click empty space to clear it, Enter clicks a `default = true` Button, and Escape closes a closable window or hides a modal.
 
 ```Lua
 local ui = dofile('/imevul/ui/init.lua')

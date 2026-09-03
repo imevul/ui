@@ -2,7 +2,7 @@ local __SRC__ = debug.getinfo(1).short_src
 local __DIR__ = fs.getDir(__SRC__)
 
 local ui = {
-	version = '1.3.0',
+	version = '1.4.0',
 	config = {
 		path = __DIR__,
 		debug = false
@@ -62,14 +62,23 @@ ui.loadModule('List')
 ui.loadModule('Text')
 ui.loadModule('Image')
 ui.loadModule('Input')
+ui.loadModule('NumberField')
 ui.loadModule('Checkbox')
+ui.loadModule('Radio')
+ui.loadModule('RadioGroup')
 ui.loadModule('ToggleButton')
 ui.loadModule('Button')
+ui.loadModule('Tooltip')
 ui.loadModule('TabButton')
 ui.loadModule('DropDown')
 ui.loadModule('Bar')
 ui.loadModule('Slider')
+ui.loadModule('Dialog')
 ui.loadModule('App')
+
+ui.dialog = ui.Dialog
+ui.alert = ui.Dialog.alert
+ui.confirm = ui.Dialog.confirm
 
 ---Assign the old UI_* global names (UI_App, UI_Window, …)
 ---@public
@@ -89,13 +98,18 @@ function ui.exportGlobals()
 	UI_Text = ui.Text
 	UI_Image = ui.Image
 	UI_Input = ui.Input
+	UI_NumberField = ui.NumberField
 	UI_Checkbox = ui.Checkbox
+	UI_Radio = ui.Radio
+	UI_RadioGroup = ui.RadioGroup
 	UI_ToggleButton = ui.ToggleButton
 	UI_Button = ui.Button
+	UI_Tooltip = ui.Tooltip
 	UI_TabButton = ui.TabButton
 	UI_DropDown = ui.DropDown
 	UI_Bar = ui.Bar
 	UI_Slider = ui.Slider
+	UI_Dialog = ui.Dialog
 	UI_App = ui.App
 end
 

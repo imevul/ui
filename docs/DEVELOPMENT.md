@@ -37,6 +37,7 @@ In the GUI, open the Lua prompt and run:
 
 ```lua
 dofile('/imevul/ui/examples/example-basic.lua')
+dofile('/imevul/ui/examples/example-widgets.lua')
 ```
 
 Use `make smoke` to confirm the library loads without a GUI.

@@ -3,6 +3,17 @@ local ui = args[1]
 assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.graphics
 
+---Match gfx.draw, which floors child origins and canvas size
+local function childHit(obj, x, y)
+	local ox = math.floor(obj.x or 0)
+	local oy = math.floor(obj.y or 0)
+	local w = math.floor(obj.ref.width or 0)
+	local h = math.floor(obj.ref.height or 0)
+	local rx = x - ox
+	local ry = y - oy
+	return rx, ry, rx >= 0 and ry >= 0 and rx < w and ry < h
+end
+
 ---@class Container : Object Can hold other objects. Handles drawing any children, and passing them relevant events.
 ---@field public layout Layout|nil
 ---@field public objects table
@@ -15,13 +26,18 @@ local Container = ui.lib.class(ui.modules.Object, function(this, data)
 	data = data or {}
 	this.layout = data.layout or nil
 	this.objects = {}
+	this.objectsDraw = {}
 	this.objectsReverse = {}
 	this.type = 'Container'
 	this.overwrite = true
 	if data.overwrite ~= nil then
 		this.overwrite = data.overwrite
 	end
-	this.padding = data.padding or 1
+	if data.padding == nil then
+		this.padding = 1
+	else
+		this.padding = data.padding
+	end
 
 	if data.items then
 		for i, item in ipairs(data.items) do
@@ -47,7 +63,11 @@ end
 ---@protected
 function Container:_drawObjects()
 	gfx.setOverwrite(self.overwrite)
-	for _, obj in ipairs(self.objects) do
+	local list = self.objectsDraw
+	if not list or #list ~= #self.objects then
+		list = self.objects
+	end
+	for _, obj in ipairs(list) do
 		if obj.ref.visible and obj.ref.canvas then
 			obj.ref:_render()
 			gfx.draw(obj.ref.canvas, obj.x, obj.y)
@@ -86,10 +106,9 @@ function Container:_mousePressed(x, y, button)
 
 	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.visible then
-			local rx = x - obj.x
-			local ry = y - obj.y
+			local rx, ry, hit = childHit(obj, x, y)
 
-			if rx >= 0 and ry >= 0 and rx < (obj.ref.width or 0) and ry < (obj.ref.height or 0) and not consumed then
+			if hit and not consumed then
 				if obj.ref.focusable then
 					local tlc = self:_findTopLevelComponent()
 					if tlc.setFocus then
@@ -105,8 +124,7 @@ function Container:_mousePressed(x, y, button)
 				end
 			end
 
-			-- Handle modal components
-			if obj.ref.drawOrder == 1/0 then
+			if obj.ref.type == 'ModalWindow' then
 				consumed = true
 			end
 		end
@@ -120,10 +138,9 @@ function Container:_mouseReleased(x, y, button)
 
 	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.visible then
-			local rx = x - obj.x
-			local ry = y - obj.y
+			local rx, ry, hit = childHit(obj, x, y)
 
-			if rx >= 0 and ry >= 0 and rx < (obj.ref.width or 0) and ry < (obj.ref.height or 0) and not consumed then
+			if hit and not consumed then
 				if obj.ref.focused then
 					obj.ref:_mouseReleased(rx, ry, button)
 				end
@@ -133,8 +150,7 @@ function Container:_mouseReleased(x, y, button)
 				end
 			end
 
-			-- Handle modal components
-			if obj.ref.drawOrder == 1/0 then
+			if obj.ref.type == 'ModalWindow' then
 				consumed = true
 			end
 		end
@@ -148,10 +164,9 @@ function Container:_mouseDrag(x, y, button)
 
 	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.visible then
-			local rx = x - obj.x
-			local ry = y - obj.y
+			local rx, ry, hit = childHit(obj, x, y)
 
-			if rx >= 0 and ry >= 0 and rx < (obj.ref.width or 0) and ry < (obj.ref.height or 0) and not consumed then
+			if hit and not consumed then
 				if obj.ref.focused then
 					obj.ref:_mouseDrag(rx, ry, button)
 				end
@@ -161,8 +176,7 @@ function Container:_mouseDrag(x, y, button)
 				end
 			end
 
-			-- Handle modal components
-			if obj.ref.drawOrder == 1/0 then
+			if obj.ref.type == 'ModalWindow' then
 				consumed = true
 			end
 		end
@@ -176,10 +190,9 @@ function Container:_mouseScroll(x, y, direction)
 
 	for _, obj in ipairs(self.objectsReverse) do
 		if obj.ref.visible then
-			local rx = x - obj.x
-			local ry = y - obj.y
+			local rx, ry, hit = childHit(obj, x, y)
 
-			if rx >= 0 and ry >= 0 and rx < (obj.ref.width or 0) and ry < (obj.ref.height or 0) and not consumed then
+			if hit and not consumed then
 				obj.ref:_mouseScroll(rx, ry, direction)
 
 				if obj.ref.opaque then
@@ -187,8 +200,7 @@ function Container:_mouseScroll(x, y, direction)
 				end
 			end
 
-			-- Handle modal components
-			if obj.ref.drawOrder == 1/0 then
+			if obj.ref.type == 'ModalWindow' then
 				consumed = true
 			end
 		end
@@ -291,49 +303,50 @@ function Container:update(skipLayout)
 		obj.ref:update()
 	end
 
-	self:_sortComponents(self.objects)
-	self:_copyReverse()
+	self:_refreshDrawOrder()
 
 	if self.layout and not skipLayout then
 		self.layout:update(self.objects, self)
 	end
 end
 
----Caches a local copy of all child objects in reverse draw order
+---Keep document order on objects; sort copies for paint and hit-test
 ---@protected
-function Container:_copyReverse()
+function Container:_refreshDrawOrder()
+	self.objectsDraw = {}
 	self.objectsReverse = {}
 	for i, v in ipairs(self.objects) do
+		self.objectsDraw[i] = v
 		self.objectsReverse[i] = v
 	end
 
+	self:_sortComponents(self.objectsDraw, false)
 	self:_sortComponents(self.objectsReverse, true)
 end
 
----Sorts child objects based on their drawOrder
+---Sorts child objects based on their drawOrder, then id
 ---@protected
 ---@param array table List of objects to sort
 ---@param reverse boolean True to reverse the sort order
 function Container:_sortComponents(array, reverse)
 	reverse = reverse or false
 
-	-- Sort objects for drawing
-	table.sort(array, function (left, right)
-		if left.ref.drawOrder ~= nil and right.ref.drawOrder ~= nil then
+	table.sort(array, function(left, right)
+		local ld = left.ref.drawOrder or 0
+		local rd = right.ref.drawOrder or 0
+		if ld ~= rd then
 			if reverse then
-				return left.ref.drawOrder > right.ref.drawOrder
-			else
-				return left.ref.drawOrder < right.ref.drawOrder
+				return ld > rd
 			end
+			return ld < rd
 		end
 
-		if left.ref.id and right.ref.id then
-			if reverse then
-				return left.ref.id > right.ref.id
-			else
-				return left.ref.id < right.ref.id
-			end
+		local li = left.ref.id or 0
+		local ri = right.ref.id or 0
+		if reverse then
+			return li > ri
 		end
+		return li < ri
 	end)
 end
 
@@ -385,6 +398,27 @@ function Container:childByName(name, recursive)
 	end
 end
 
+---Topmost visible descendant at local x,y, or nil
+---@public
+---@return Object|nil
+function Container:hitTest(x, y)
+	for _, obj in ipairs(self.objectsReverse) do
+		if obj.ref.visible then
+			local rx, ry, hit = childHit(obj, x, y)
+			if hit then
+				if obj.ref.hitTest then
+					local inner = obj.ref:hitTest(rx, ry)
+					if inner then
+						return inner
+					end
+				end
+				return obj.ref
+			end
+		end
+	end
+	return nil
+end
+
 ---Collect visible focusable descendants in document order
 ---@public
 ---@param out table|nil
@@ -417,7 +451,7 @@ end
 function Container:getPositionOf(child)
 	for _, obj in ipairs(self.objects) do
 		if obj.ref == child then
-			return obj.x, obj.y
+			return math.floor(obj.x), math.floor(obj.y)
 		end
 	end
 

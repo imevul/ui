@@ -24,7 +24,7 @@ end)
 ---@see Container#_drawObjects
 function ScrollPanel:_drawObjects()
 	gfx.setOverwrite(self.overwrite)
-	for _, obj in pairs(self.objects) do
+	for _, obj in ipairs(self.objectsDraw or self.objects) do
 		if obj.ref.visible and obj.ref.canvas then
 			obj.ref:_render()
 			gfx.draw(obj.ref.canvas, obj.x - self.offsetX, obj.y - self.offsetY)
@@ -98,7 +98,7 @@ function ScrollPanel:_updateSize()
 		local width = self.width
 		local height = self.height
 
-		for _, obj in pairs(self.objects) do
+		for _, obj in ipairs(self.objects) do
 			width = math.max(width, obj.x + obj.ref.width)
 			height = math.max(height, obj.y + obj.ref.height)
 		end

@@ -49,7 +49,7 @@ end
 function Input:_placeCaretFromX(x)
 	local origin = self:_textOrigin()
 	local vis = self:_visibleWidth()
-	local col = math.floor(x - origin)
+	local col = math.floor(x - origin + 0.5)
 	if col < 0 then
 		col = 0
 	elseif col > vis then

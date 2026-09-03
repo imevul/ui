@@ -43,4 +43,4 @@ If a gate cannot run, say which command failed or was skipped and why.
 
 ## Roadmap honesty
 
-[`docs/ROADMAP.md`](docs/ROADMAP.md) is the phase-level source of truth. P0–P3 and F-1–F-3 have landed. Next work is remaining Future (F-4 widgets, F-5 wiki, F-6 CI, F-7 monitor attach).
+[`docs/ROADMAP.md`](docs/ROADMAP.md) is the phase-level source of truth. P0–P3 and F-1–F-4 have landed. Next work is remaining Future (F-5 wiki, F-6 CI, F-7 monitor attach).

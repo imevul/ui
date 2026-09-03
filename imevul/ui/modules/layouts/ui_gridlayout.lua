@@ -76,7 +76,7 @@ function GridLayout:getPosition(index, total)
 		y = 0
 	end
 
-	return x, y
+	return math.floor(x), math.floor(y)
 end
 
 return GridLayout
