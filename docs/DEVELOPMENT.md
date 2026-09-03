@@ -41,3 +41,9 @@ dofile('/imevul/ui/examples/example-widgets.lua')
 ```
 
 Use `make smoke` to confirm the library loads without a GUI.
+
+## GitHub Actions
+
+[`.github/workflows/smoke.yml`](../.github/workflows/smoke.yml) is the hosted counterpart of `make smoke`. It runs on push to `master`, pull requests, and `workflow_dispatch`.
+
+The job checks out the repo and runs [`Commandcracker/craftos-pc-action`](https://github.com/Commandcracker/craftos-pc-action) (`@v1`, PUC Lua, not LuaJIT). `root` is the checkout, so `/imevul/ui/init.lua` exists on the computer. `--script` is the host path `/github/workspace/dev/smoke.lua` (the checkout inside the action container). Timeout is 15 seconds, matching `make smoke`. There is no repo-root `startup.lua`; success is `os.shutdown()` after `SMOKE_OK`. A hung or asserting smoke never shuts down and fails on timeout.
