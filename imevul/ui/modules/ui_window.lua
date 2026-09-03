@@ -4,6 +4,7 @@ assert(ui, 'Imevul UI library not found')
 local gfx = ui.lib.graphics
 
 ---@class Window : Container Container with a border and a title
+---@field public borderStyle string 'solid' (default) or 'lines'
 local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	ui.modules.Container.init(this, data)
 
@@ -12,6 +13,7 @@ local Window = ui.lib.class(ui.modules.Container, function(this, data)
 	this.title = data.title or ''
 	this.color = data.color
 	this.background = data.background or nil
+	this.borderStyle = data.borderStyle == 'lines' and 'lines' or 'solid'
 	this.type = 'Window'
 	this.padding = data.padding or 2
 	this.closable = data.closeButton and true or false
@@ -33,12 +35,18 @@ end)
 ---Border and title. Drawn after children so overflowing content cannot eat the frame.
 ---@protected
 function Window:_drawChrome()
-	gfx.setColor(self.color or self.config.theme.primary)
-	gfx.rect('line', 0, 0, self.width, self.height)
-	gfx.setColor(colors.white)
-	gfx.setBackgroundColor(self.color or self.config.theme.primary)
-	gfx.print(self.title, math.floor((self.width - string.len(self.title)) / 2), 0)
-	gfx.setBackgroundColor(self.background or self.config.theme.background)
+	local line = self.color or self.config.theme.primary
+	local fill = self.background or self.config.theme.background
+	local lined = self.borderStyle == 'lines'
+	gfx.frame(0, 0, self.width, self.height, {
+		borderStyle = self.borderStyle,
+		color = line,
+		fill = fill,
+		title = self.title,
+		titleColor = lined and (self.config.theme.text or colors.white) or colors.white,
+		titleFill = lined and fill or line,
+	})
+	gfx.setBackgroundColor(fill)
 end
 
 ---@see Object#_draw

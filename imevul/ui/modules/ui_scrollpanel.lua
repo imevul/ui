@@ -37,14 +37,7 @@ function ScrollPanel:_draw()
 	gfx.setBackgroundColor(self.background or self.config.theme.background or colors.black)
 	gfx.clear()
 
-	if self.border then
-		gfx.setColor(self.color or self.config.theme.blurredBackground)
-		gfx.rect('line', 0, 0, self.width, self.height)
-		gfx.setColor(self.config.theme.focusedText or colors.black)
-		gfx.setBackgroundColor(self.color or self.config.theme.blurredBackground)
-		gfx.print(self.title, math.floor((self.width - string.len(self.title)) / 2), 0)
-		gfx.setBackgroundColor(self.background or self.config.theme.background or colors.black)
-	end
+	self:_drawChrome()
 
 	ui.modules.Container._draw(self)
 

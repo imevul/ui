@@ -183,6 +183,142 @@ end
 
 graphics.rectangle = graphics.rect
 
+-- Sextant bits: TL=1 TR=2 ML=4 MR=8 BL=16. BR is invert (swap fg/bg, 31-bits).
+local SEXT_TL = 1
+local SEXT_TR = 2
+local SEXT_ML = 4
+local SEXT_MR = 8
+local SEXT_BL = 16
+local SEXT_BR = 32
+
+local function bitOr(a, b)
+	local result = 0
+	local place = 1
+	for _ = 0, 5 do
+		if (a % 2) == 1 or (b % 2) == 1 then
+			result = result + place
+		end
+		a = math.floor(a / 2)
+		b = math.floor(b / 2)
+		place = place * 2
+	end
+	return result
+end
+
+local function sextantCell(mask, line, fill)
+	local br = mask >= SEXT_BR
+	local bits = mask % SEXT_BR
+	if br then
+		return string.char(128 + (31 - bits)), fill, line
+	end
+	return string.char(128 + bits), line, fill
+end
+
+local function putSextant(canvas, x, y, mask, line, fill)
+	local ch, fg, bg = sextantCell(mask, line, fill)
+	setCell(canvas, x, y, ch, fg, bg)
+end
+
+---Draw a rectangular frame. borderStyle 'solid' (default) or 'lines' (teletext 128-159).
+---@param x number
+---@param y number
+---@param width number
+---@param height number
+---@param opts table|nil color, fill, borderStyle, title, titleColor, titleFill
+function graphics.frame(x, y, width, height, opts)
+	local canvas = graphics.currentCanvas
+	if not canvas then
+		return
+	end
+	opts = opts or {}
+	x = math.floor(x or 0)
+	y = math.floor(y or 0)
+	width = math.floor(width or 0)
+	height = math.floor(height or 0)
+	if width <= 0 or height <= 0 then
+		return
+	end
+
+	local style = opts.borderStyle
+	if style ~= 'lines' then
+		style = 'solid'
+	end
+	local line = resolveColor(opts.color) or graphics.color
+	local fill = resolveColor(opts.fill) or graphics.background
+	local title = tostring(opts.title or '')
+
+	if style == 'solid' then
+		local old = graphics.color
+		graphics.color = line
+		graphics.rect('line', x, y, width, height)
+		graphics.color = old
+		if title ~= '' then
+			local tfg = resolveColor(opts.titleColor) or colors.white
+			local tbg = resolveColor(opts.titleFill) or line
+			local tx = x + math.floor((width - #title) / 2)
+			local savedFg = graphics.color
+			local savedBg = graphics.background
+			graphics.color = tfg
+			graphics.background = tbg
+			graphics.print(title, tx, y)
+			graphics.color = savedFg
+			graphics.background = savedBg
+		end
+		return
+	end
+
+	local left = bitOr(bitOr(SEXT_TL, SEXT_ML), SEXT_BL)
+	local right = bitOr(bitOr(SEXT_TR, SEXT_MR), SEXT_BR)
+	local top = bitOr(SEXT_TL, SEXT_TR)
+	local bottom = bitOr(SEXT_BL, SEXT_BR)
+
+	if width == 1 and height == 1 then
+		putSextant(canvas, x, y, bitOr(bitOr(left, right), bitOr(top, bottom)), line, fill)
+	elseif width == 1 then
+		putSextant(canvas, x, y, bitOr(bitOr(left, right), top), line, fill)
+		for iy = y + 1, y + height - 2 do
+			putSextant(canvas, x, iy, bitOr(left, right), line, fill)
+		end
+		if height > 1 then
+			putSextant(canvas, x, y + height - 1, bitOr(bitOr(left, right), bottom), line, fill)
+		end
+	elseif height == 1 then
+		putSextant(canvas, x, y, bitOr(bitOr(left, top), bottom), line, fill)
+		for ix = x + 1, x + width - 2 do
+			putSextant(canvas, ix, y, bitOr(top, bottom), line, fill)
+		end
+		if width > 1 then
+			putSextant(canvas, x + width - 1, y, bitOr(bitOr(right, top), bottom), line, fill)
+		end
+	else
+		putSextant(canvas, x, y, bitOr(left, top), line, fill)
+		putSextant(canvas, x + width - 1, y, bitOr(right, top), line, fill)
+		putSextant(canvas, x, y + height - 1, bitOr(left, bottom), line, fill)
+		putSextant(canvas, x + width - 1, y + height - 1, bitOr(right, bottom), line, fill)
+		for ix = x + 1, x + width - 2 do
+			putSextant(canvas, ix, y, top, line, fill)
+			putSextant(canvas, ix, y + height - 1, bottom, line, fill)
+		end
+		for iy = y + 1, y + height - 2 do
+			putSextant(canvas, x, iy, left, line, fill)
+			putSextant(canvas, x + width - 1, iy, right, line, fill)
+		end
+	end
+
+	if title ~= '' then
+		local tfg = resolveColor(opts.titleColor) or line
+		local tbg = resolveColor(opts.titleFill) or fill
+		local tx = x + math.floor((width - #title) / 2)
+		local savedFg = graphics.color
+		local savedBg = graphics.background
+		graphics.color = tfg
+		graphics.background = tbg
+		graphics.print(title, tx, y)
+		graphics.color = savedFg
+		graphics.background = savedBg
+	end
+end
+
 function graphics.draw(drawable, x, y)
 	local dest = graphics.currentCanvas
 	if not dest or not drawable then

@@ -14,6 +14,33 @@ local app = ui.App({
 			})
 			a:add(win)
 			assert(win.width == a.width and win.height == a.height, 'fill window should match App (no App padding inset)')
+			assert(win.borderStyle == 'solid', 'Window borderStyle defaults to solid')
+			local lined = ui.Window({
+				title = 'Lines',
+				borderStyle = 'lines'
+			})
+			assert(lined.borderStyle == 'lines', 'Window borderStyle lines is stored')
+			local linedPanel = ui.Panel({
+				border = true,
+				borderStyle = 'lines'
+			})
+			assert(linedPanel.borderStyle == 'lines', 'Panel borderStyle lines is stored')
+
+			local gfx = ui.lib.graphics
+			local canvas = gfx.newCanvas(4, 3)
+			gfx.setCanvas(canvas)
+			gfx.frame(0, 0, 4, 3, {
+				borderStyle = 'lines',
+				color = colors.cyan,
+				fill = colors.black
+			})
+			local function cellByte(cx, cy)
+				return string.byte(canvas.cells[cy + 1][cx + 1].char)
+			end
+			assert(cellByte(0, 2) >= 128 and cellByte(0, 2) <= 159, 'bottom-left corner must be teletext, not a letter')
+			assert(cellByte(3, 2) >= 128 and cellByte(3, 2) <= 159, 'bottom-right corner must be teletext, not a letter')
+			assert(cellByte(0, 0) >= 128 and cellByte(0, 0) <= 159, 'top-left corner must be teletext')
+			assert(cellByte(3, 0) >= 128 and cellByte(3, 0) <= 159, 'top-right corner must be teletext')
 
 			local function childXY(container, child)
 				for _, obj in ipairs(container.objects) do

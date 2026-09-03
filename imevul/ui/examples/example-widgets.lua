@@ -14,6 +14,7 @@ local app = ui.App({
 
 local win = ui.Window({
 	title = 'F-4 widgets',
+	borderStyle = 'lines',
 	layout = ui.ListLayout({ spacing = 1 })
 })
 app:add(win)
