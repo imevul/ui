@@ -2,7 +2,7 @@ local __SRC__ = debug.getinfo(1).short_src
 local __DIR__ = fs.getDir(__SRC__)
 
 local ui = {
-	version = '1.4.0',
+	version = '1.5.0',
 	config = {
 		path = __DIR__,
 		debug = false

@@ -38,9 +38,12 @@ In the GUI, open the Lua prompt and run:
 ```lua
 dofile('/imevul/ui/examples/example-basic.lua')
 dofile('/imevul/ui/examples/example-widgets.lua')
+dofile('/imevul/ui/examples/example-monitor.lua')
 ```
 
-Use `make smoke` to confirm the library loads without a GUI.
+`example-monitor.lua` uses `App({ monitor = true })`: the first attached monitor (or one already present) becomes the output, detach falls back to the computer term, and `monitor_touch` is a click. Do not set `monitor` if you already redirected to a VTerm that owns the screen.
+
+Use `make smoke` to confirm the library loads without a GUI. Smoke also adopts a 20×10 `window` as `monitor`, restores the fallback size, and — when CraftOS-PC `periphemu` is present — drives `monitor_touch` / `peripheral_detach` on a virtual `left` monitor.
 
 ## GitHub Actions
 

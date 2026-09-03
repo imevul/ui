@@ -1,8 +1,8 @@
--- Headless CraftOS-PC smoke (F-1 / F-2 / F-3).
+-- Headless CraftOS-PC smoke (F-1 / F-2 / F-3 / F-7).
 assert(fs.exists('/imevul/ui/init.lua'), 'mount missing: /imevul/ui/init.lua')
 local ui = dofile('/imevul/ui/init.lua')
 assert(type(ui.version) == 'string')
-assert(ui.version == '1.4.0')
+assert(ui.version == '1.5.0')
 assert(type(ui.App) == 'function' or type(ui.App) == 'table')
 assert(UI_App == nil, 'UI_App must not be global unless exportGlobals is called')
 
@@ -169,5 +169,54 @@ local app = ui.App({
 	}
 })
 app:initialize()
+
+local nativeW, nativeH = term.getSize()
+local win = window.create(term.current(), 1, 1, 20, 10)
+local app2 = ui.App({
+	monitor = win,
+	callbacks = {
+		load = function(a)
+			assert(a.width == 20 and a.height == 10, 'term-like monitor should adopt window size')
+			a:_restoreFallback()
+			assert(a.width == nativeW and a.height == nativeH, 'restore should return to construct fallback size')
+			a:quit()
+		end
+	}
+})
+app2:initialize()
+
+if periphemu and type(periphemu.create) == 'function' then
+	pcall(function()
+		periphemu.create('left', 'monitor')
+	end)
+	if peripheral.isPresent('left') and peripheral.getType('left') == 'monitor' then
+		local sawTouch = false
+		local sawDetach = false
+		local app3 = ui.App({
+			monitor = 'left',
+			callbacks = {
+				load = function(a)
+					local mon = peripheral.wrap('left')
+					local mw, mh = mon.getSize()
+					assert(a.width == mw and a.height == mh, 'named monitor should adopt size')
+					os.queueEvent('monitor_touch', 'left', 2, 2)
+					os.queueEvent('peripheral_detach', 'left')
+				end,
+				event = function(a, event)
+					if event == 'monitor_touch' then
+						sawTouch = true
+					elseif event == 'peripheral_detach' then
+						sawDetach = true
+						a:quit()
+					end
+				end
+			}
+		})
+		app3:initialize()
+		assert(sawTouch, 'monitor_touch should fire callbacks.event')
+		assert(sawDetach, 'peripheral_detach should fire callbacks.event')
+	end
+end
+
 print('SMOKE_OK')
 os.shutdown()

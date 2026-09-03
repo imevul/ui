@@ -5,7 +5,12 @@ local gfx = ui.lib.graphics
 
 ---@class App : Container Top-level container. Owns os.pullEvent, presents the screen, and dispatches callbacks.
 ---App callbacks: load, update(dt), keyPressed, keyReleased, mousePressed, mouseReleased, mouseDrag, mouseScroll, textInput.
+---callbacks.event(app, event, ...) fires on every pulled event (for example a VTerm handleEvent/forwardEvent hook).
 ---Other event names (term_resize, rednet_message, …) are forwarded through _eventHandler as callbacks[event].
+---monitor = true uses the first monitor (or the next one that attaches). monitor = 'left' uses that name.
+---monitor may also be a term-like object (CC window, later a VTerm). Nil keeps term.current().
+---Do not set monitor if you already redirected to a VTerm that owns the screen; snapshot fallback is term.current().
+---@field public monitor boolean|string|table|nil
 local App = ui.lib.class(ui.modules.Container, function(this, data)
 	data = data or {}
 	local termSize = {term.getSize()}
@@ -42,6 +47,10 @@ local App = ui.lib.class(ui.modules.Container, function(this, data)
 
 	this.config = data.config
 	this.callbacks = data.callbacks
+	this.monitor = data.monitor
+	this._fallback = term.current()
+	this._outputName = nil
+	this._outputTerm = nil
 	this._shiftHeld = false
 	this._hoverTarget = nil
 	this._hoverSince = 0
@@ -49,6 +58,96 @@ local App = ui.lib.class(ui.modules.Container, function(this, data)
 	this._tooltipBubble = nil
 	this._tooltipSource = nil
 end)
+
+local function isTermLike(obj)
+	return type(obj) == 'table' and type(obj.getSize) == 'function'
+end
+
+---Redirect to a term-like object and resize the app to it
+---@protected
+---@param termObj table
+---@param name string|nil Peripheral name when App owns a monitor
+function App:_adoptOutput(termObj, name)
+	if not isTermLike(termObj) then
+		return
+	end
+	term.redirect(termObj)
+	self._outputTerm = termObj
+	self._outputName = name
+	local tw, th = termObj.getSize()
+	self:resize(tw, th)
+end
+
+---Redirect back to the term.current() snapshot from construct
+---@protected
+function App:_restoreFallback()
+	local fallback = self._fallback or term.native()
+	term.redirect(fallback)
+	self._outputTerm = nil
+	self._outputName = nil
+	local tw, th = fallback.getSize()
+	self:resize(tw, th)
+end
+
+---Whether this App should adopt the named monitor
+---@protected
+---@param name string
+---@return boolean
+function App:_wantsMonitor(name)
+	if not name then
+		return false
+	end
+	if self.monitor == true then
+		return self._outputName == nil
+	end
+	return self.monitor == name
+end
+
+---Wrap and adopt a monitor peripheral if it matches the monitor option
+---@protected
+---@param name string
+function App:_tryAdoptNamed(name)
+	if not name or not self:_wantsMonitor(name) then
+		return
+	end
+	if not peripheral or not peripheral.getType or peripheral.getType(name) ~= 'monitor' then
+		return
+	end
+	local wrap = peripheral.wrap(name)
+	if wrap then
+		self:_adoptOutput(wrap, name)
+	end
+end
+
+---Adopt a configured term object or an already-present monitor before the event loop
+---@protected
+function App:_adoptConfiguredOutput()
+	if isTermLike(self.monitor) then
+		self:_adoptOutput(self.monitor, nil)
+		return
+	end
+	if self.monitor == true and peripheral and peripheral.getNames then
+		for _, name in ipairs(peripheral.getNames()) do
+			if peripheral.getType(name) == 'monitor' then
+				self:_tryAdoptNamed(name)
+				if self._outputName then
+					return
+				end
+			end
+		end
+		return
+	end
+	if type(self.monitor) == 'string' then
+		self:_tryAdoptNamed(self.monitor)
+	end
+end
+
+---Ignore computer mouse while painting on a named monitor
+---@protected
+---@return boolean
+function App:_usingNamedMonitor()
+	return self._outputName ~= nil
+end
 
 ---Show the single app tooltip bubble under owner
 ---@public
@@ -407,6 +506,7 @@ end
 ---@public
 function App:initialize()
 	self._running = true
+	self:_adoptConfiguredOutput()
 	self:_load()
 	self:_present()
 
@@ -427,29 +527,67 @@ function App:initialize()
 		elseif event == 'char' then
 			self:_textInput(a)
 		elseif event == 'mouse_click' then
-			self:_mousePressed(b - 1, c - 1, a)
+			if not self:_usingNamedMonitor() then
+				self:_mousePressed(b - 1, c - 1, a)
+			end
 		elseif event == 'mouse_up' then
-			self:_mouseReleased(b - 1, c - 1, a)
+			if not self:_usingNamedMonitor() then
+				self:_mouseReleased(b - 1, c - 1, a)
+			end
 		elseif event == 'mouse_drag' then
-			self:_mouseDrag(b - 1, c - 1, a)
+			if not self:_usingNamedMonitor() then
+				self:_mouseDrag(b - 1, c - 1, a)
+			end
 		elseif event == 'mouse_scroll' then
-			self:_mouseScroll(b - 1, c - 1, a)
+			if not self:_usingNamedMonitor() then
+				self:_mouseScroll(b - 1, c - 1, a)
+			end
 		elseif event == 'mouse_move' then
-			if c ~= nil then
-				self:_mouseMove(b - 1, c - 1)
-			else
-				self:_mouseMove((a or 1) - 1, (b or 1) - 1)
+			if not self:_usingNamedMonitor() then
+				if c ~= nil then
+					self:_mouseMove(b - 1, c - 1)
+				else
+					self:_mouseMove((a or 1) - 1, (b or 1) - 1)
+				end
 			end
 		elseif event == 'term_resize' then
 			local tw, th = term.getSize()
 			self:resize(tw, th)
 			self:_eventHandler(event, a, b, c, d, e)
 			self:_present()
+		elseif event == 'peripheral' then
+			self:_tryAdoptNamed(a)
+			self:_eventHandler(event, a, b, c, d, e)
+			self:_present()
+		elseif event == 'peripheral_detach' then
+			if a == self._outputName then
+				self:_restoreFallback()
+			end
+			self:_eventHandler(event, a, b, c, d, e)
+			self:_present()
+		elseif event == 'monitor_touch' then
+			if a == self._outputName then
+				self:_mousePressed((b or 1) - 1, (c or 1) - 1, 1)
+				self:_mouseReleased((b or 1) - 1, (c or 1) - 1, 1)
+			end
+			self:_eventHandler(event, a, b, c, d, e)
+		elseif event == 'monitor_resize' then
+			if a == self._outputName then
+				local tw, th = term.getSize()
+				self:resize(tw, th)
+				self:_present()
+			end
+			self:_eventHandler(event, a, b, c, d, e)
 		else
 			self:_eventHandler(event, a, b, c, d, e)
 		end
+
+		if self.callbacks.event then
+			self.callbacks.event(self, event, a, b, c, d, e)
+		end
 	end
 
+	self:_restoreFallback()
 	term.setBackgroundColor(colors.black)
 	term.setTextColor(colors.white)
 	term.clear()
