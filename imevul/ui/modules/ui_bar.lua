@@ -20,6 +20,8 @@ local Bar = ui.lib.class(ui.modules.Object, function(this, data)
 	data.maxValue = data.maxValue or 100
 	data.color = data.color or nil
 	data.gradient = data.gradient or 0
+	assert(type(data.value) == 'number', 'value must be a number, got ' .. type(data.value))
+	assert(type(data.maxValue) == 'number', 'maxValue must be a number, got ' .. type(data.maxValue))
 	assert(data.maxValue >= data.minValue, 'maxValue (' .. data.maxValue .. ') must be >= minValue (' .. data.minValue .. ')')
 	data.reverse = data.reverse or false
 
@@ -29,15 +31,28 @@ local Bar = ui.lib.class(ui.modules.Object, function(this, data)
 	this:setMaxValue(this.maxValue)
 
 	this.color = data.color
+	this.background = data.background or nil
 	this.gradient = data.gradient
 	this.direction = data.direction or ui.modules.Direction.HORIZONTAL
 	this.reverse = data.reverse
 	this.type = 'Bar'
 end)
 
+---Fill ratio in [0, 1]. Zero span reads as empty instead of dividing by zero.
+---@protected
+---@return number
+function Bar:_fillPercent()
+	local span = (self.maxValue or 0) - (self.minValue or 0)
+	if span <= 0 then
+		return 0.0
+	end
+
+	return math.min(1.0, math.max(0.0, ((self.value or 0) - (self.minValue or 0)) * 1.0 / span))
+end
+
 ---@see Object#_draw
 function Bar:_draw()
-	local fillPercent = math.min(1.0, math.max(0.0, self.value * 1.0 / self.maxValue))
+	local fillPercent = self:_fillPercent()
 
 	gfx.setBackgroundColor(self.background or self.config.theme.blurredBackground or colors.lightGray)
 	gfx.clear()

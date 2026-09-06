@@ -46,7 +46,7 @@ function ToggleButton:_draw()
 		gfx.print(self.prefixOff, tx, ty)
 	end
 
-	gfx.setBackgroundColor(colors.black or self.config.theme.background)
+	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
 return ToggleButton

@@ -2,7 +2,7 @@
 assert(fs.exists('/imevul/ui/init.lua'), 'mount missing: /imevul/ui/init.lua')
 local ui = dofile('/imevul/ui/init.lua')
 assert(type(ui.version) == 'string')
-assert(ui.version == '1.5.1')
+assert(ui.version == '1.5.2')
 assert(type(ui.App) == 'function' or type(ui.App) == 'table')
 assert(UI_App == nil, 'UI_App must not be global unless exportGlobals is called')
 
@@ -176,6 +176,58 @@ local app = ui.App({
 			clip.height = 6
 			gfx.print('stale-height', 0, 4)
 			assert(clip.cells[5] == nil, 'draw Y past allocated rows must not index a nil row')
+
+			local tabs = ui.TabPanel({ width = 20, height = 10 })
+			assert(tabs, 'TabPanel with no tabs must not crash')
+			tabs:switchTab(3)
+
+			local sparse = ui.TabPanel({
+				width = 20,
+				height = 10,
+				tabs = { { name = 'one', tab = ui.Panel({}) }, { name = 'broken' } }
+			})
+			sparse:switchTab(2)
+
+			local orphan = ui.Text({ text = 'orphan' })
+			assert(orphan:sibling(1) == nil, 'sibling without a parent is nil')
+			orphan.parent = ui.Container({ width = 5, height = 5 })
+			assert(orphan:sibling(1) == nil, 'sibling of a non-child is nil, not an error')
+
+			gfx.setCanvas(gfx.newCanvas(4, 4))
+			gfx.draw({ width = 2, height = 2, typeOf = function() return true end })
+
+			local themed = ui.Checkbox({ text = 'themed' })
+			themed:_inheritConfig({ theme = { background = colors.blue, text = colors.white } })
+			themed:_render()
+			assert(gfx.getBackgroundColor() == colors.blue, 'Checkbox must restore the theme background')
+
+			local zeroBar = ui.Bar({ width = 6, height = 1, maxValue = 0, background = colors.magenta })
+			assert(zeroBar.background == colors.magenta, 'Bar should keep the background option')
+			assert(zeroBar:_fillPercent() == 0, 'zero span reads as empty, not nan')
+			local zeroSlider = ui.Slider({ width = 0, height = 1, maxValue = 10, value = 4 })
+			zeroSlider:setValueFromPoint(0, 0)
+			assert(zeroSlider.value == 4, 'zero-width slider should ignore point input')
+
+			local fixed = ui.Text({ text = 'hello', width = 0 })
+			assert(fixed.width == 0 and fixed.fixedWidth, 'width 0 must be respected')
+
+			local box = ui.Checkbox({ text = 'right click' })
+			box:_mouseReleased(0, 0, 2)
+			assert(box.value == false, 'right click must not toggle')
+			box:_mouseReleased(0, 0, 1)
+			assert(box.value == true, 'left click toggles')
+			box:setText(nil)
+
+			local grid = ui.Panel({
+				width = 12,
+				height = 8,
+				padding = 1,
+				layout = ui.GridLayout({ columns = 2 })
+			})
+			grid:add(ui.Text({ text = 'g' }))
+			grid:update()
+			local gx, gy = grid:getPositionOf(grid:child(1))
+			assert(gx >= 1 and gy >= 1, 'GridLayout should honor container padding')
 
 			local tiny = ui.Window({
 				width = 10,

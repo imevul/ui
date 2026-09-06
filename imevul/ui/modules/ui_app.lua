@@ -71,10 +71,14 @@ function App:_adoptOutput(termObj, name)
 	if not isTermLike(termObj) then
 		return
 	end
+	-- A monitor can die between the attach event and this call
+	local ok, tw, th = pcall(termObj.getSize)
+	if not ok or not tw or not th then
+		return
+	end
 	term.redirect(termObj)
 	self._outputTerm = termObj
 	self._outputName = name
-	local tw, th = termObj.getSize()
 	self:resize(tw, th)
 end
 
@@ -499,7 +503,19 @@ function App:_present()
 	end
 	gfx.setCanvas(self.canvas)
 	self:_draw()
-	gfx.present(self.canvas)
+
+	if pcall(gfx.present, self.canvas) or not self._outputName then
+		return
+	end
+
+	-- The monitor went away before its peripheral_detach event reached us
+	self:_restoreFallback()
+	if not self.canvas then
+		return
+	end
+	gfx.setCanvas(self.canvas)
+	self:_draw()
+	pcall(gfx.present, self.canvas)
 end
 
 ---Initialize the app and start the main event loop

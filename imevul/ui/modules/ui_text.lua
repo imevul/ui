@@ -9,9 +9,8 @@ local Text = ui.lib.class(ui.modules.Object, function(this, data)
 
 	data.text = data.text or ''
 
-	if data.width and data.width > 0 then
+	if data.width and data.width >= 0 then
 		this.fixedWidth = true
-		data.width = data.width or 1
 	else
 		this.fixedWidth = false
 		data.width = string.len(data.text) or 1

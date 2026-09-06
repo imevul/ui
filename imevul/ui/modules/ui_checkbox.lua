@@ -24,13 +24,15 @@ local Checkbox = ui.lib.class(ui.modules.Text, function(this, data)
 	this.type = 'Checkbox'
 end)
 
+---Set the label. onChange is reserved for toggle(), so it does not fire here.
 ---@see Text#setText
 function Checkbox:setText(newText)
+	newText = tostring(newText or '')
 	if self.text == newText then
 		return
 	end
 
-	if newText:sub(0, string.len(self.prefix)) ~= self.prefix then
+	if newText:sub(1, string.len(self.prefix)) ~= self.prefix then
 		newText = self.prefix .. ' ' .. newText
 	end
 
@@ -67,7 +69,7 @@ function Checkbox:_draw()
 		gfx.print(self.prefixOff, tx, ty)
 	end
 
-	gfx.setBackgroundColor(colors.black or self.config.theme.background)
+	gfx.setBackgroundColor(self.config.theme.background or colors.black)
 end
 
 ---Toggle the Checkbox on or off
@@ -87,10 +89,13 @@ function Checkbox:_keyReleased(key, keyCode)
 	end
 end
 
+---Left button only; a right-click should not flip the value
 ---@see Object#_mouseReleased
 function Checkbox:_mouseReleased(x, y, button)
 	ui.modules.Text._mouseReleased(self, x, y, button)
-	self:toggle()
+	if button == nil or button == 1 then
+		self:toggle()
+	end
 end
 
 return Checkbox

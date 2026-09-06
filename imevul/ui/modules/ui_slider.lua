@@ -23,7 +23,7 @@ function Slider:_draw()
 		return
 	end
 
-	local fillPercent = math.min(1.0, math.max(0.0, self.value * 1.0 / self.maxValue))
+	local fillPercent = self:_fillPercent()
 
 	if self.focused then
 		gfx.setBackgroundColor(self.config.theme.focusedBackground or colors.white)
@@ -58,11 +58,21 @@ end
 ---@param y number Y coordinate
 function Slider:setValueFromPoint(x, y)
 	local percent
+	local span
+	local offset
 	if self.direction == ui.modules.Direction.HORIZONTAL then
-		percent = math.min(1.0, math.max(0.0, x * 1.0 / self.width))
+		span = self.width or 0
+		offset = x
 	else
-		percent = math.min(1.0, math.max(0.0, y * 1.0 / self.height))
+		span = self.height or 0
+		offset = y
 	end
+
+	if span <= 0 then
+		return
+	end
+
+	percent = math.min(1.0, math.max(0.0, offset * 1.0 / span))
 
 	if self.reverse then
 		percent = 1 - percent

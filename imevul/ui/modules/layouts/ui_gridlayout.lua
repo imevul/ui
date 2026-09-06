@@ -53,27 +53,36 @@ function GridLayout:getPosition(index, total)
 	else
 		numColumns = math.ceil(total / self.rows)
 	end
+	numColumns = math.max(1, numColumns)
 
 	if self.rows > 0 then
 		numRows = self.rows
 	else
 		numRows = math.ceil(total / numColumns)
 	end
+	numRows = math.max(1, numRows)
 
-	local cellWidth = self.container.width / numColumns
-	local cellHeight = self.container.height / numRows
+	local padding = self.container.padding or 0
+	if padding < 0 then
+		padding = 0
+	end
+
+	local innerWidth = math.max(0, self.container.width - padding * 2)
+	local innerHeight = math.max(0, self.container.height - padding * 2)
+	local cellWidth = innerWidth / numColumns
+	local cellHeight = innerHeight / numRows
 	local column = (index - 1) % numColumns
 	local row = math.floor((index - 1) / numColumns)
 
-	local x = math.min(self.container.width - 1, math.max(0, column * cellWidth))
-	local y = math.min(self.container.height - 1, math.max(0, row * cellHeight))
+	local x = padding + math.min(math.max(0, innerWidth - 1), math.max(0, column * cellWidth))
+	local y = padding + math.min(math.max(0, innerHeight - 1), math.max(0, row * cellHeight))
 
 	if tonumber(x) == nil then
-		x = 0
+		x = padding
 	end
 
 	if tonumber(y) == nil then
-		y = 0
+		y = padding
 	end
 
 	return math.floor(x), math.floor(y)

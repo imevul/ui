@@ -139,12 +139,16 @@ end
 ---Find a sibling (object with the same parent) based on relative position
 ---@return Object|nil
 function Object:sibling(relativePos)
-	if not self.parent then
+	if not self.parent or not self.parent.indexOf or not self.parent.child then
 		return nil
 	end
 
 	local index = self.parent:indexOf(self)
-	return self.parent:child(index + relativePos)
+	if not index then
+		return nil
+	end
+
+	return self.parent:child(index + (relativePos or 0))
 end
 
 ---Get the x,y position of a child object

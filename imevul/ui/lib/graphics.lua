@@ -347,6 +347,9 @@ function graphics.draw(drawable, x, y)
 	if dest == drawable then
 		error('Cannot draw canvas to self')
 	end
+	if not drawable.cells then
+		return
+	end
 	x = math.floor(x or 0)
 	y = math.floor(y or 0)
 	local overwrite = dest.overwrite

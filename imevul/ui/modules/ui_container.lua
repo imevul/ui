@@ -260,7 +260,6 @@ function Container:add(object, x, y)
 	for _, value in ipairs(self.objects) do
 		if value.ref == object then
 			error('Object already added')
-			return
 		end
 	end
 
