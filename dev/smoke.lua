@@ -2,7 +2,7 @@
 assert(fs.exists('/imevul/ui/init.lua'), 'mount missing: /imevul/ui/init.lua')
 local ui = dofile('/imevul/ui/init.lua')
 assert(type(ui.version) == 'string')
-assert(ui.version == '1.5.0')
+assert(ui.version == '1.5.1')
 assert(type(ui.App) == 'function' or type(ui.App) == 'table')
 assert(UI_App == nil, 'UI_App must not be global unless exportGlobals is called')
 
@@ -163,6 +163,36 @@ local app = ui.App({
 			local mx, my = modal:getPositionIn(a)
 			a:_mousePressed(mx + 1, my + 1, 1)
 			assert(a:getFocusedLeaf() == nil, 'clicking modal chrome should clear focus')
+
+			local clip = gfx.newCanvas(3, 2)
+			gfx.setCanvas(clip)
+			gfx.print('hello world', -2, -1)
+			gfx.print('overflow', 0, 5)
+			gfx.rect('fill', -1, -1, 10, 10)
+			gfx.frame(0, 0, 8, 8, { borderStyle = 'lines' })
+			assert(clip.cells[1] and clip.cells[2], 'in-bounds rows stay allocated')
+			assert(clip.cells[3] == nil, 'print past height must not grow the buffer')
+
+			clip.height = 6
+			gfx.print('stale-height', 0, 4)
+			assert(clip.cells[5] == nil, 'draw Y past allocated rows must not index a nil row')
+
+			local tiny = ui.Window({
+				width = 10,
+				height = 5,
+				layout = ui.ListLayout({ spacing = 0 })
+			})
+			tiny:_inheritConfig(a.config)
+			tiny:add(ui.List({
+				height = -6,
+				items = {
+					ui.Button({ text = 'name [types] 99 slots contents extra' }),
+					ui.Button({ text = 'another long picker label [a,b] 12' }),
+				}
+			}))
+			if tiny.canvas then
+				tiny:_render()
+			end
 
 			a:quit()
 		end

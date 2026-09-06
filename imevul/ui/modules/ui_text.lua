@@ -58,8 +58,9 @@ end
 ---@param newText string New text value
 function Text:_resizeForText(newText)
 	if not self.fixedWidth then
-		self.width = string.len(newText) + math.ceil(self.padding * 2)
-		self.canvas = gfx.newCanvas(self.width, self.height)
+		self.width = string.len(newText) + math.ceil((self.padding or 0) * 2)
+		self.height = self.height or 1
+		self:createCanvas()
 	end
 end
 

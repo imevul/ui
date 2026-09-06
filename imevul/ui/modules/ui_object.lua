@@ -261,6 +261,13 @@ function Object:update()
 			height = maxHeight + self.reqHeight
 		end
 
+		if type(width) == 'number' then
+			width = math.max(0, math.floor(width))
+		end
+		if type(height) == 'number' then
+			height = math.max(0, math.floor(height))
+		end
+
 		if width ~= self.width or height ~= self.height then
 			self:resize(width, height)
 		end

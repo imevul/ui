@@ -29,6 +29,8 @@ local function blitOf(color)
 end
 
 local function newCells(width, height, fg, bg)
+	width = math.max(0, math.floor(tonumber(width) or 0))
+	height = math.max(0, math.floor(tonumber(height) or 0))
 	local cells = {}
 	for y = 1, height do
 		cells[y] = {}
@@ -71,12 +73,25 @@ local graphics = {
 }
 
 local function setCell(canvas, x, y, char, fg, bg)
-	local ix = math.floor(x) + 1
-	local iy = math.floor(y) + 1
-	if ix < 1 or iy < 1 or ix > canvas.width or iy > canvas.height then
+	if not canvas or not canvas.cells then
 		return
 	end
-	canvas.cells[iy][ix] = { char = char, fg = fg, bg = bg }
+	local ix = math.floor(tonumber(x) or 0) + 1
+	local iy = math.floor(tonumber(y) or 0) + 1
+	if ix < 1 or iy < 1 then
+		return
+	end
+	if canvas.width and ix > canvas.width then
+		return
+	end
+	if canvas.height and iy > canvas.height then
+		return
+	end
+	local row = canvas.cells[iy]
+	if not row then
+		return
+	end
+	row[ix] = { char = char, fg = fg, bg = bg }
 end
 
 function graphics.setOverwrite(flag)
@@ -121,6 +136,8 @@ function graphics.clear()
 	local fg = graphics.color
 	local bg = graphics.background
 	canvas.defaultBg = bg
+	canvas.width = math.max(0, math.floor(tonumber(canvas.width) or 0))
+	canvas.height = math.max(0, math.floor(tonumber(canvas.height) or 0))
 	canvas.cells = newCells(canvas.width, canvas.height, fg, bg)
 end
 
